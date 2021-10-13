@@ -32,23 +32,22 @@ The full documentation of the ToFFi Toolbox can be found [here](ToFFi_Toolbox-20
 
 # Source Lines of Code (SLOC)
 
-412 text files.
-391 unique files.                                          
-342 files ignored.
+394 text files.
+374 unique files.                                          
+144 files ignored.
 
-github.com/AlDanial/cloc v 1.82  T=24.15 s (15.4 files/s, 2767.9 lines/s)
+github.com/AlDanial/cloc v 1.82  T=0.36 s (1006.2 files/s, 81665.7 lines/s)
 
 
 | Language                 | files            | blank         | comment       | code       |
 | ------------------------ | ---------------: | ------------: | ------------: | ---------: |
-| SVG                      |         9        |      9        |      9        |      37022 |
-| MATLAB                   |       246        |   2063        |   3838        |       7215 |
+| MATLAB                   |       244        |   1953        |   3727        |       6959 |
 | HTML                     |        91        |   2571        |   4531        |       6609 |
 | Bourne Shell             |         9        |    433        |    375        |       1670 |
-| Markdown                 |         2        |     27        |      0        |        127 |
+| Markdown                 |         1        |     11        |      0        |        108 |
 | Bourne Again Shell       |        14        |     42        |    208        |         84 |
 | MUMPS                    |         2        |      3        |      0        |         16 |
-| **SUM:**                 |       **373**    |   **5148**    |   **8961**    |  **52743** |
+| **SUM:**                 |       **361**    |   **5013**    |   **8841**    |  **15446** |
 
 
 
