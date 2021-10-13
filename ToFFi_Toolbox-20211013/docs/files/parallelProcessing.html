@@ -1,0 +1,215 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>parallelProcessing</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="parallelProcessing.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li><li><a href="#4">Outputs</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> clusteringEvaluationOneROI = parallelProcessing(CFG, dataToTest, clusteringEvaluationOneROI, jobInfo)
+</pre><p>Performs optimal number of clusters evaluation using selected method, clustering algorithm and metric. Calculations are performed as parallel computations.</p><h2 id="3">Inputs</h2><p><b>dataToTest</b> - double; 2D-array of size points x dimensions. Contains                points that will be clustered to test which number of                clusters is optimal. It represents spectral modes for single                ROI from all individual subjects from STAGE_2 that were                pooled together in STAGE_3.</p><p><b>CFG</b> - struct with obligatory fields:</p><p><i>STAGE_4.nIterations</i> - double; positive integer number of iterations of                         evaluation.</p><p><i>STAGE_4.methodName</i> - char; name of the clustering algorithm to be used in                        evaluation.Possible options: <a href="https://www.mathworks.com/help/stats/evalclusters.html#bt0oocm_sep_shared-clust">https://www.mathworks.com/help/stats/evalclusters.html#bt0oocm_sep_shared-clust</a></p><p><i>STAGE_4.criterionType</i> - char; name of the criterion type to be used in                           evaluation. Possible options: <a href="https://www.mathworks.com/help/stats/evalclusters.html#shared-criterion">https://www.mathworks.com/help/stats/evalclusters.html#shared-criterion</a></p><p><i>STAGE_4.kList</i> - double; 1D-array of integers &gt; 0. List of number of                   cluster values to be tested in evaluation.</p><p><i>STAGE_4.distanceMetric</i> - char; metric used to calculate distance between                            points. Possible values: <a href="https://www.mathworks.com/help/stats/evalclusters.html#bt0oocm_sep_shared-Distance">https://www.mathworks.com/help/stats/evalclusters.html#bt0oocm_sep_shared-Distance</a></p><p><b>clusteringEvaluationOneROI</b> - struct storing results of optimal cluster                                number evaluation for each iteration. Has                                fields:</p><p><i>optNumClustersAllIter</i> - double; 1D-vector of size 1 x iterations. For                           each planned iteration it will store optimal                           number of clusters computed for each iteration.</p><p><i>criterionValues</i> - double; 1D-vector of size 1 x iterations. For each                     planned iteration it will store selected criterion                     value corresponding to the optimal number of clusters                     computed at that iteration.</p><p><b>jobInfo</b> - output of the getJobInfo.m function.</p><h2 id="4">Outputs</h2><p><b>clusteringEvaluationOneROI</b> - same as in input but updated by the data                                from all planned iterations.</p><pre class="codeinput">[iterationsIndicesList, nBatches] = <span class="keyword">...</span>
+    prepareBatchesIndices(CFG.Global.maxNumSpmdWorkers, CFG.STAGE_4.nIterations);
+
+<span class="comment">% RNG_3.1 Generate unique seed for each batch</span>
+batchSeeds = generateSeeds(nBatches);
+
+<span class="keyword">for</span> iBatch = 1:nBatches
+    indices             = iterationsIndicesList{iBatch};
+    nWorkersInThisBatch = length(indices); <span class="comment">% list of indices cam have unequal lengths</span>
+
+    <span class="keyword">spmd</span>(nWorkersInThisBatch)
+
+	iWorker = labindex;
+
+	<span class="comment">% RNG_3.2 Set worker rng stream</span>
+	spmdTestVec = <span class="keyword">...</span>
+	    setRngSpmdSeed(batchSeeds(iBatch), iWorker, nWorkersInThisBatch);
+
+	disp([<span class="string">'Num. Clust. Evaluation: Iteration '</span>, num2str(indices(iWorker)), <span class="string">' / '</span>, num2str(CFG.STAGE_4.nIterations), <span class="string">' ...'</span> ]);
+
+	<span class="comment">% using MATLAB built-in routine evalclusters</span>
+	evalutationObject_WORKERS = evalclusters( dataToTest, <span class="keyword">...</span>
+	    CFG.STAGE_4.methodName, <span class="keyword">...</span>
+	    CFG.STAGE_4.criterionType, <span class="keyword">...</span>
+	    <span class="string">'klist'</span>,    CFG.STAGE_4.kList, <span class="keyword">...</span>
+	    <span class="string">'Distance'</span>, CFG.STAGE_4.distanceMetric);
+
+    <span class="keyword">end</span> <span class="comment">% spmd</span>
+
+    <span class="comment">% extract from Composites</span>
+    <span class="keyword">for</span> iWorker = 1:nWorkersInThisBatch
+	evalutationObject = evalutationObject_WORKERS{iWorker};
+
+	clusteringEvaluationOneROI.optNumClustersAllIter(indices(iWorker)) = evalutationObject.OptimalK;
+	idx = find(evalutationObject.InspectedK == evalutationObject.OptimalK);
+	clusteringEvaluationOneROI.criterionValues(indices(iWorker))       = evalutationObject.CriterionValues(idx);
+    <span class="keyword">end</span> <span class="comment">% iWorker</span>
+
+    <span class="comment">% RNG_3.3 Save rng of each batch</span>
+    saveRngSpmdInfo(<span class="string">'../output/rngSpmd'</span>, jobInfo.jobID, iBatch, spmdTestVec)
+    clear <span class="string">spmdTestVec</span> <span class="string">spmdStream</span>
+    clear <span class="string">evalutationObject_WORKERS</span> <span class="string">iWorker</span> <span class="string">tmp</span> <span class="comment">% to clear the context so next time I can have different number of workers (see: https://www.mathworks.com/matlabcentral/answers/223939-how-to-specify-the-number-of-labs-in-smpd)</span>
+
+<span class="keyword">end</span> <span class="comment">% iBatch</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function clusteringEvaluationOneROI = parallelProcessing(CFG, dataToTest, clusteringEvaluationOneROI, jobInfo)
+%%
+% Performs optimal number of clusters evaluation using selected method,
+% clustering algorithm and metric. Calculations are performed as parallel
+% computations.
+%
+%% Inputs
+% *dataToTest* - double; 2D-array of size points x dimensions. Contains
+%                points that will be clustered to test which number of
+%                clusters is optimal. It represents spectral modes for single
+%                ROI from all individual subjects from STAGE_2 that were
+%                pooled together in STAGE_3.
+%
+% *CFG* - struct with obligatory fields:
+%
+% _STAGE_4.nIterations_ - double; positive integer number of iterations of
+%                         evaluation.
+%
+% _STAGE_4.methodName_ - char; name of the clustering algorithm to be used in
+%                        evaluation.Possible options:
+% https://www.mathworks.com/help/stats/evalclusters.html#bt0oocm_sep_shared-clust
+%
+% _STAGE_4.criterionType_ - char; name of the criterion type to be used in
+%                           evaluation. Possible options:
+% https://www.mathworks.com/help/stats/evalclusters.html#shared-criterion
+%
+% _STAGE_4.kList_ - double; 1D-array of integers > 0. List of number of
+%                   cluster values to be tested in evaluation.
+%
+% _STAGE_4.distanceMetric_ - char; metric used to calculate distance between
+%                            points. Possible values:
+% https://www.mathworks.com/help/stats/evalclusters.html#bt0oocm_sep_shared-Distance
+%
+% *clusteringEvaluationOneROI* - struct storing results of optimal cluster
+%                                number evaluation for each iteration. Has
+%                                fields:
+%
+% _optNumClustersAllIter_ - double; 1D-vector of size 1 x iterations. For
+%                           each planned iteration it will store optimal
+%                           number of clusters computed for each iteration.
+%
+% _criterionValues_ - double; 1D-vector of size 1 x iterations. For each
+%                     planned iteration it will store selected criterion
+%                     value corresponding to the optimal number of clusters
+%                     computed at that iteration.
+%
+% *jobInfo* - output of the getJobInfo.m function.
+%% Outputs
+% *clusteringEvaluationOneROI* - same as in input but updated by the data
+%                                from all planned iterations.
+%%
+
+[iterationsIndicesList, nBatches] = ...
+    prepareBatchesIndices(CFG.Global.maxNumSpmdWorkers, CFG.STAGE_4.nIterations);
+
+% RNG_3.1 Generate unique seed for each batch
+batchSeeds = generateSeeds(nBatches);
+
+for iBatch = 1:nBatches
+    indices             = iterationsIndicesList{iBatch};
+    nWorkersInThisBatch = length(indices); % list of indices cam have unequal lengths
+
+    spmd(nWorkersInThisBatch)
+
+	iWorker = labindex;
+
+	% RNG_3.2 Set worker rng stream
+	spmdTestVec = ...
+	    setRngSpmdSeed(batchSeeds(iBatch), iWorker, nWorkersInThisBatch);
+
+	disp(['Num. Clust. Evaluation: Iteration ', num2str(indices(iWorker)), ' / ', num2str(CFG.STAGE_4.nIterations), ' ...' ]);
+
+	% using MATLAB built-in routine evalclusters
+	evalutationObject_WORKERS = evalclusters( dataToTest, ...
+	    CFG.STAGE_4.methodName, ...
+	    CFG.STAGE_4.criterionType, ...
+	    'klist',    CFG.STAGE_4.kList, ...
+	    'Distance', CFG.STAGE_4.distanceMetric);
+
+    end % spmd
+
+    % extract from Composites
+    for iWorker = 1:nWorkersInThisBatch
+	evalutationObject = evalutationObject_WORKERS{iWorker};
+
+	clusteringEvaluationOneROI.optNumClustersAllIter(indices(iWorker)) = evalutationObject.OptimalK;
+	idx = find(evalutationObject.InspectedK == evalutationObject.OptimalK);
+	clusteringEvaluationOneROI.criterionValues(indices(iWorker))       = evalutationObject.CriterionValues(idx);
+    end % iWorker
+
+    % RNG_3.3 Save rng of each batch
+    saveRngSpmdInfo('../output/rngSpmd', jobInfo.jobID, iBatch, spmdTestVec)
+    clear spmdTestVec spmdStream
+    clear evalutationObject_WORKERS iWorker tmp % to clear the context so next time I can have different number of workers (see: https://www.mathworks.com/matlabcentral/answers/223939-how-to-specify-the-number-of-labs-in-smpd)
+
+end % iBatch
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,293 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>gaussianMixtureModelling_IF</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="gaussianMixtureModelling_IF.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li><li><a href="#4">Outputs</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> individualFingerprint = gaussianMixtureModelling_IF(cfg, singleSubjectSingleRoiData)
+</pre><p>Performs soft-clustering using EM algorithm and next hard clustering on the result. Uses standard MATLAB fitgmdist and cluster routines with additional initial sorting (result is invariant to the order of rows of the data matrix). Estimates input data distribution by the Gaussian Mixture Model.</p><h2 id="3">Inputs</h2><p><b>cfg</b> - struct; configuration with fields:</p><p><i>regularization</i> - double; real number &#955; between 0 and 1. Represents amount                    of regularization to be applied to covariance                    matrices. At the end of each iteration of the EM                    algorithm, &#955; is added to every diagonal element of the                    covariance matrix (track <i>regVal</i> variable inside                    gmcluster_learn function inside gmcluster routine called                    by gmdistribution.fit inside fitgmdist.m MATLAB function).</p><p><i>nClusters</i> - double; integer number of clusters to be found in the data.</p><p><i>logPath</i> - (optional) path to the log file to be created that store             information about subjects and ROI for which EM algoritm not             converged. See globalFunctionsScripts/logNotConverged.m for             details.</p><p><b>singleSubjectSingleRoiData</b> - struct; Contains data to be clustered for                                the single subject. Obligatory fields:</p><p><i>normalizedPowerSpectrum_Trials</i> - double; 2D-array that contains values of                                    normalized power spectrum for each time                                    segment and frequency. Each row                                    represents single point.                                    Size: trials x frequencies.</p><p><i>trialsClusterIndices</i> - double; 1D array containing cluster index for each                          of the clustered points in the input data matrix.                          Contain values from 1 to cfg.nClusters.</p><p><i>iROI</i> - double; integer index of the ROI that <b>singleSubjectSingleRoiData</b>          structure represents</p><p><i>iSub</i> - double; integer index of the subject that <b>singleSubjectSingleRoiData</b>          structure represents</p><h2 id="4">Outputs</h2><p><b>individualFingerprint</b> - <b>singleSubjectSingleRoiData</b> extended with new                           fields:</p><p><i>gmClassInstance</i> - object that stores a Gaussian mixture model (GMM), which is                     a multivariate distribution that consists of                     multivariate Gaussian distribution components.                     Further details: (<a href="https://www.mathworks.com/help/stats/gmdistribution.html">https://www.mathworks.com/help/stats/gmdistribution.html</a>)</p><p><i>didGmmConverge</i> - double; 0 (EM algorithm did not converge) or 1 (EM                    algorithm has converged)</p><p><i>spectralModes</i> - double; 2D-array of size cfg.nClusters x frequencies. Each                  row contain single gaussian component center. Equals to                  <i>gmClassInstance.mu</i>. In Spectral Fingerprinting jargon                  each component is called spectral mode.</p><p><i>trialsSpectralModeMembership</i> - double; 1D-array containing cluster index                                  for each of the clustered points in the                                  input data matrix. Contains values from 1                                  to cfg.nClusters.</p><p><i>emptyClusters</i> - double; 1D-array containing cluster indices that has zero                   points assigned to it. Such situation can happen if the                   input data are degenerated or parameters force that some                   of the resulting spectral modes are identical. In that                   situation one of the "twins" have no points assigned to                   it, because they were "stolen" by its "sibling".</p><p>Following fields are removed: 'roiWithinClusterDistance', 'roiCentroids', 'trialsClusterIndices', 'nTrialsBeforeRejection', 'rejectedTrialsIndices', 'normalizedPowerSpectrum_Trials'.</p><pre class="codeinput">disp(<span class="string">'Gaussian Mixture modelling ...'</span>)
+
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'regularization'</span>)) error(<span class="string">'Missing field regularization in cfg input argument !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'nClusters'</span>))    error(<span class="string">'Missing field nClusters in cfg input argument !'</span>);  <span class="keyword">end</span>
+
+<span class="comment">% Gaussian Mixture clustering; uses k-means cluster as starting point</span>
+
+roiPowerSpectrum_Trials = singleSubjectSingleRoiData.normalizedPowerSpectrum_Trials;
+roiTrialsClusterIndices = singleSubjectSingleRoiData.trialsClusterIndices;
+
+options   = statset(<span class="string">'Display'</span>,<span class="string">'final'</span>,<span class="string">'MaxIter'</span>,1000);
+
+gmClassInstance = fitgmdist(roiPowerSpectrum_Trials, cfg.nClusters,  <span class="keyword">...</span>
+    <span class="string">'Start'</span>, roiTrialsClusterIndices, <span class="keyword">...</span>
+    <span class="string">'Options'</span>, options, <span class="keyword">...</span>
+    <span class="string">'Regularize'</span>, cfg.regularization );
+<span class="comment">% NOTE: INITIAL VALUES of MU, SIGMA and PComponents before fitting</span>
+<span class="comment">% (see lines 536-544 in MATLAB/toolbox/stats/stats/@gmdistribution/private/gmcluster.m)</span>
+<span class="comment">%</span>
+<span class="comment">% Cluster indices are from k=1:K</span>
+<span class="comment">% For each k:</span>
+<span class="comment">% 1. X0 matrix of all points with label == k (each row is single point)</span>
+<span class="comment">% 2. Compute mean across rows to get mu_k</span>
+<span class="comment">% 3. X0 = X0 - mu_k  (center the matrix)</span>
+<span class="comment">% 4. Compute non-regularized covariance matrix Sigma = X0' * X0</span>
+<span class="comment">% 5. Divide by total number of points and add regularization by \lambda * identity matrix:</span>
+<span class="comment">%       Sigma = Sigma/n +  lambda * I;</span>
+<span class="comment">% 6. Proporion PComponents is given by the ratio:</span>
+<span class="comment">%       p_k = (number of points with label k) / n</span>
+
+didConverge = gmClassInstance.Converged;
+
+<span class="keyword">if</span>(isfield(cfg, <span class="string">'logPath'</span>))
+    <span class="keyword">if</span>(didConverge == 0)
+	cfgLog = [];
+	cfgLog.colValues = [singleSubjectSingleRoiData.iSub, <span class="keyword">...</span>
+	    singleSubjectSingleRoiData.iROI ];
+	cfgLog.colNames = {<span class="string">'iSub'</span>, <span class="string">'iROI'</span>};
+	cfgLog.logPath  = cfg.logPath;
+	logNotConverged(cfgLog)
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% sort components (helps averaging and reproducibility)</span>
+[sorted_mu, idx]    = sortrows(gmClassInstance.mu);
+sorted_Sigma        = gmClassInstance.Sigma(:,:, idx);
+sorted_PComponents  = gmClassInstance.PComponents(idx);
+gmClassInstance     = gmdistribution(sorted_mu, sorted_Sigma, sorted_PComponents);
+
+individualFingerprint = singleSubjectSingleRoiData;
+individualFingerprint = rmfield(individualFingerprint, <span class="keyword">...</span>
+    {<span class="string">'roiWithinClusterDistance'</span>, <span class="string">'roiCentroids'</span>, <span class="keyword">...</span>
+    <span class="string">'trialsClusterIndices'</span>, <span class="string">'nTrialsBeforeRejection'</span>, <span class="keyword">...</span>
+    <span class="string">'rejectedTrialsIndices'</span>, <span class="string">'normalizedPowerSpectrum_Trials'</span>});
+individualFingerprint.didGmmConverge = -1; <span class="comment">% initially assuming that not converged</span>
+individualFingerprint.gmClassInstance               = gmClassInstance;
+individualFingerprint.didGmmConverge               = didConverge;
+individualFingerprint.spectralModes                 = gmClassInstance.mu; <span class="comment">% 1-st level clusters</span>
+individualFingerprint.trialsSpectralModeMembership  = cluster(gmClassInstance, roiPowerSpectrum_Trials);
+clear <span class="string">singleSubjectSingleRoiData</span>
+
+<span class="comment">% Noting down empty clusters.</span>
+<span class="comment">% After using cluster function trials will be assigned to subset of</span>
+<span class="comment">% spectralModes because some of the modes are identical. Some modes</span>
+<span class="comment">% (clusters) will be empty and also have zero time duration</span>
+<span class="comment">% (calculated in other function).</span>
+individualFingerprint.emptyClusters = setdiff(<span class="keyword">...</span>
+    1:cfg.nClusters, <span class="keyword">...</span>
+    unique(individualFingerprint.trialsSpectralModeMembership)<span class="keyword">...</span>
+    )
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function individualFingerprint = gaussianMixtureModelling_IF(cfg, singleSubjectSingleRoiData)
+%%
+% Performs soft-clustering using EM algorithm and next hard clustering on the
+% result. Uses standard MATLAB fitgmdist and cluster routines with additional
+% initial sorting (result is invariant to the order of rows of the data
+% matrix). Estimates input data distribution by the Gaussian Mixture Model.
+%% Inputs
+% *cfg* - struct; configuration with fields:
+%
+% _regularization_ - double; real number λ between 0 and 1. Represents amount
+%                    of regularization to be applied to covariance
+%                    matrices. At the end of each iteration of the EM
+%                    algorithm, λ is added to every diagonal element of the
+%                    covariance matrix (track _regVal_ variable inside
+%                    gmcluster_learn function inside gmcluster routine called
+%                    by gmdistribution.fit inside fitgmdist.m MATLAB function).
+%
+% _nClusters_ - double; integer number of clusters to be found in the data.
+%
+% _logPath_ - (optional) path to the log file to be created that store
+%             information about subjects and ROI for which EM algoritm not
+%             converged. See globalFunctionsScripts/logNotConverged.m for
+%             details.
+%
+% *singleSubjectSingleRoiData* - struct; Contains data to be clustered for
+%                                the single subject. Obligatory fields:
+%
+% _normalizedPowerSpectrum_Trials_ - double; 2D-array that contains values of
+%                                    normalized power spectrum for each time
+%                                    segment and frequency. Each row
+%                                    represents single point.
+%                                    Size: trials x frequencies.
+%
+% _trialsClusterIndices_ - double; 1D array containing cluster index for each
+%                          of the clustered points in the input data matrix.
+%                          Contain values from 1 to cfg.nClusters.
+%
+% _iROI_ - double; integer index of the ROI that *singleSubjectSingleRoiData*
+%          structure represents
+%
+% _iSub_ - double; integer index of the subject that *singleSubjectSingleRoiData*
+%          structure represents
+%% Outputs
+% *individualFingerprint* - *singleSubjectSingleRoiData* extended with new
+%                           fields:
+%
+% _gmClassInstance_ - object that stores a Gaussian mixture model (GMM), which is
+%                     a multivariate distribution that consists of
+%                     multivariate Gaussian distribution components.
+%                     Further details:
+% (https://www.mathworks.com/help/stats/gmdistribution.html)
+%
+% _didGmmConverge_ - double; 0 (EM algorithm did not converge) or 1 (EM
+%                    algorithm has converged)
+%
+% _spectralModes_ - double; 2D-array of size cfg.nClusters x frequencies. Each
+%                  row contain single gaussian component center. Equals to
+%                  _gmClassInstance.mu_. In Spectral Fingerprinting jargon
+%                  each component is called spectral mode.
+%
+% _trialsSpectralModeMembership_ - double; 1D-array containing cluster index
+%                                  for each of the clustered points in the
+%                                  input data matrix. Contains values from 1
+%                                  to cfg.nClusters.
+%
+% _emptyClusters_ - double; 1D-array containing cluster indices that has zero
+%                   points assigned to it. Such situation can happen if the
+%                   input data are degenerated or parameters force that some
+%                   of the resulting spectral modes are identical. In that
+%                   situation one of the "twins" have no points assigned to
+%                   it, because they were "stolen" by its "sibling".
+%
+% Following fields are removed: 'roiWithinClusterDistance', 'roiCentroids',
+% 'trialsClusterIndices', 'nTrialsBeforeRejection', 'rejectedTrialsIndices',
+% 'normalizedPowerSpectrum_Trials'.
+%
+%%
+
+disp('Gaussian Mixture modelling ...')
+
+if(~isfield(cfg, 'regularization')) error('Missing field regularization in cfg input argument !'); end
+if(~isfield(cfg, 'nClusters'))    error('Missing field nClusters in cfg input argument !');  end
+
+% Gaussian Mixture clustering; uses k-means cluster as starting point
+
+roiPowerSpectrum_Trials = singleSubjectSingleRoiData.normalizedPowerSpectrum_Trials;
+roiTrialsClusterIndices = singleSubjectSingleRoiData.trialsClusterIndices;
+
+options   = statset('Display','final','MaxIter',1000);
+
+gmClassInstance = fitgmdist(roiPowerSpectrum_Trials, cfg.nClusters,  ...
+    'Start', roiTrialsClusterIndices, ...
+    'Options', options, ...
+    'Regularize', cfg.regularization );
+% NOTE: INITIAL VALUES of MU, SIGMA and PComponents before fitting
+% (see lines 536-544 in MATLAB/toolbox/stats/stats/@gmdistribution/private/gmcluster.m)
+%
+% Cluster indices are from k=1:K
+% For each k:
+% 1. X0 matrix of all points with label == k (each row is single point)
+% 2. Compute mean across rows to get mu_k
+% 3. X0 = X0 - mu_k  (center the matrix)
+% 4. Compute non-regularized covariance matrix Sigma = X0' * X0
+% 5. Divide by total number of points and add regularization by \lambda * identity matrix:
+%       Sigma = Sigma/n +  lambda * I;
+% 6. Proporion PComponents is given by the ratio:
+%       p_k = (number of points with label k) / n
+
+didConverge = gmClassInstance.Converged;
+
+if(isfield(cfg, 'logPath'))
+    if(didConverge == 0)
+	cfgLog = [];
+	cfgLog.colValues = [singleSubjectSingleRoiData.iSub, ...
+	    singleSubjectSingleRoiData.iROI ];
+	cfgLog.colNames = {'iSub', 'iROI'};
+	cfgLog.logPath  = cfg.logPath;
+	logNotConverged(cfgLog)
+    end
+end
+
+% sort components (helps averaging and reproducibility)
+[sorted_mu, idx]    = sortrows(gmClassInstance.mu);
+sorted_Sigma        = gmClassInstance.Sigma(:,:, idx);
+sorted_PComponents  = gmClassInstance.PComponents(idx);
+gmClassInstance     = gmdistribution(sorted_mu, sorted_Sigma, sorted_PComponents);
+
+individualFingerprint = singleSubjectSingleRoiData;
+individualFingerprint = rmfield(individualFingerprint, ...
+    {'roiWithinClusterDistance', 'roiCentroids', ...
+    'trialsClusterIndices', 'nTrialsBeforeRejection', ...
+    'rejectedTrialsIndices', 'normalizedPowerSpectrum_Trials'});
+individualFingerprint.didGmmConverge = -1; % initially assuming that not converged
+individualFingerprint.gmClassInstance               = gmClassInstance;
+individualFingerprint.didGmmConverge               = didConverge;
+individualFingerprint.spectralModes                 = gmClassInstance.mu; % 1-st level clusters
+individualFingerprint.trialsSpectralModeMembership  = cluster(gmClassInstance, roiPowerSpectrum_Trials);
+clear singleSubjectSingleRoiData
+
+% Noting down empty clusters.
+% After using cluster function trials will be assigned to subset of
+% spectralModes because some of the modes are identical. Some modes
+% (clusters) will be empty and also have zero time duration
+% (calculated in other function).
+individualFingerprint.emptyClusters = setdiff(...
+    1:cfg.nClusters, ...
+    unique(individualFingerprint.trialsSpectralModeMembership)...
+    )
+
+##### SOURCE END #####
+--></body></html>

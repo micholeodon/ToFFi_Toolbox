@@ -1,0 +1,185 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>isOneCluster</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="isOneCluster.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li><li><a href="#4">Outputs</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [isOne, prop] = isOneCluster(cfg, X)
+</pre><p>Checks whether data forms single cluster according to the given metric. For cosine metric, it calculates the angles between all data points and a probe vector. If a distribution of the angle is Gaussian then it is assumed that data forms a single cluster. For Euclidean metric, multivariate normality test is carried out. If data is Gaussian then it is assumed that it forms a single cluster. If it happens that probe vector is the symmetry axis of the data, then angle distribution will be symmetric to it and probably gaussian which can lead to spuriously assuming that data forms single cluster. To prevent this, multiple random unit probe vectors are used and for each vector we test for normality. If majority of the test are in favor of single cluster then we assume data forms a single cluster.</p><h2 id="3">Inputs</h2><p><b>cfg</b> - struct with fields:</p><p><i>metric</i> - distance metric. Currently supported: 'cosine' or 'sqEuclidean'.</p><p><b>X</b> - double N-by-P matrix. N is the number of observations, and P is the       number of variables</p><h2 id="4">Outputs</h2><p><b>isOne</b> - flag; equals 1 if data forms single cluster according to given           distance metric (cfg.metric) or 0 if not</p><p><b>prop</b> - double; percentage of tests whose answer points to single cluster          solution</p><pre class="codeinput">N       = size(X,1);
+nDim    = size(X,2);
+nProbes = 1000; <span class="comment">% number of tests</span>
+
+<span class="keyword">switch</span>(cfg.metric)
+    <span class="keyword">case</span> <span class="string">'cosine'</span>
+        <span class="comment">% current idea:</span>
+
+        <span class="comment">% normality test on an angles distribution</span>
+        x0 =  ones(1,nDim)/sqrt(nDim); <span class="comment">% probe unit vector - first probe</span>
+        <span class="comment">% add rest of the probes</span>
+        x0_2 = rand(nProbes-1,nDim);
+        x0_2 = x0_2./sqrt(sum(x0_2.^2, 2));
+
+        X0 = [x0; x0_2];
+        T = [];
+        <span class="keyword">for</span> iProbe = 1:nProbes
+            x       = X0(iProbe,:);
+            phi     = acos((X*x')./sqrt(sum(X.^2, 2)));
+            h       = lillietest(phi); <span class="comment">% h=0 =&gt; normal</span>
+            T = [T, ~h];
+        <span class="keyword">end</span>
+        prop = sum(T)/nProbes;
+        isOne = (prop &gt; 0.5); <span class="comment">% test for majority</span>
+
+    <span class="keyword">case</span> <span class="string">'sqEuclidean'</span>
+        <span class="comment">% normality test on dat itself</span>
+        h = HZmvntest(X); <span class="comment">% h=0 =&gt; normal</span>
+        isOne = ~h;
+        prop = [];
+    <span class="keyword">otherwise</span>
+        <span class="comment">% give warning</span>
+        warning([<span class="string">'Currently, detection of whether data forms a single cluster '</span> <span class="keyword">...</span>
+                 <span class="string">'is  not implemented for metrics other than ''cosine'' or '</span> <span class="keyword">...</span>
+                 <span class="string">'''euclidean'' ! Number of optimal clusters will be greater '</span> <span class="keyword">...</span>
+                 <span class="string">'or equal 2.'</span>])
+        prop = 0;
+        isOne = 0;
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [isOne, prop] = isOneCluster(cfg, X)
+%%
+% Checks whether data forms single cluster according to the given metric.
+% For cosine metric, it calculates the angles between all data points and a
+% probe vector. If a distribution of the angle is Gaussian then it is assumed
+% that data forms a single cluster. For Euclidean metric, multivariate
+% normality test is carried out. If data is Gaussian then it is assumed that
+% it forms a single cluster.
+% If it happens that probe vector is the symmetry
+% axis of the data, then angle distribution will be symmetric to it
+% and probably gaussian which can lead to spuriously assuming that
+% data forms single cluster. To prevent this, multiple random unit probe
+% vectors are used and for each vector we test for normality. If majority
+% of the test are in favor of single cluster then we assume data forms a
+% single cluster.
+%
+%% Inputs
+% *cfg* - struct with fields:
+%
+% _metric_ - distance metric. Currently supported: 'cosine' or 'sqEuclidean'.
+%
+% *X* - double N-by-P matrix. N is the number of observations, and P is the
+%       number of variables
+%% Outputs
+%
+% *isOne* - flag; equals 1 if data forms single cluster according to given
+%           distance metric (cfg.metric) or 0 if not
+%
+% *prop* - double; percentage of tests whose answer points to single cluster
+%          solution 
+%
+%%
+N       = size(X,1);
+nDim    = size(X,2);
+nProbes = 1000; % number of tests
+
+switch(cfg.metric)
+    case 'cosine'
+        % current idea:         
+        
+        % normality test on an angles distribution 
+        x0 =  ones(1,nDim)/sqrt(nDim); % probe unit vector - first probe
+        % add rest of the probes 
+        x0_2 = rand(nProbes-1,nDim);
+        x0_2 = x0_2./sqrt(sum(x0_2.^2, 2));
+
+        X0 = [x0; x0_2];
+        T = [];
+        for iProbe = 1:nProbes
+            x       = X0(iProbe,:);
+            phi     = acos((X*x')./sqrt(sum(X.^2, 2)));
+            h       = lillietest(phi); % h=0 => normal
+            T = [T, ~h];
+        end
+        prop = sum(T)/nProbes;
+        isOne = (prop > 0.5); % test for majority
+        
+    case 'sqEuclidean'
+        % normality test on dat itself
+        h = HZmvntest(X); % h=0 => normal
+        isOne = ~h; 
+        prop = [];
+    otherwise
+        % give warning
+        warning(['Currently, detection of whether data forms a single cluster ' ...
+                 'is  not implemented for metrics other than ''cosine'' or ' ...
+                 '''euclidean'' ! Number of optimal clusters will be greater ' ...
+                 'or equal 2.'])
+        prop = 0;
+        isOne = 0;
+end
+
+##### SOURCE END #####
+--></body></html>

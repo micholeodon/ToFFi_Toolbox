@@ -1,0 +1,228 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>binaryLinkageAnalysis</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="binaryLinkageAnalysis.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li><li><a href="#4">Outputs</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> binaryLinkage = binaryLinkageAnalysis(cfg, stageConfig, fitMatrix)
+</pre><p>Performs hierarchical agglomerative hierarchical clustering on the input data matrix.</p><p>References: [1] "Similarity across Areas" section in A. Keitel and J. Gross, &#8220;Individual human brain areas can be identified from their characteristic spectral activation fingerprints,&#8221; PLoS Biol, vol. 14, no. 6, p. e1002498, 2016.</p><p>[2] MATLAB Documentation about linkage function: <a href="https://www.mathworks.com/help/stats/linkage.html">https://www.mathworks.com/help/stats/linkage.html</a></p><h2 id="3">Inputs</h2><p><b>cfg</b> - struct with fields:</p><p><i>goodRows</i> - double; 1D-array with positive integers meaning rows to be              selected from <b>fitMatrix</b> to perform the linkage.</p><p><i>goodCols</i> - double; 1D-array with positive integers meaning colums to be              selected from <b>fitMatrix</b> to perform the linkage.</p><p><i>observationsLabels</i> - (optional) cell array with names describing each of                        the observation to be clustered.</p><p><b>stageConfig</b> - struct representing STAGE_8 configuration. Used fields:</p><p><i>linkageMethod</i> - char; name of the method to be used. Possible values: <a href="https://www.mathworks.com/help/stats/linkage.html#mw_59e9693d-3784-4a0d-89dd-5dd020a605b2">https://www.mathworks.com/help/stats/linkage.html#mw_59e9693d-3784-4a0d-89dd-5dd020a605b2</a></p><p><i>linkageDistanceMetric</i> - char; name of the metric to be used to compare                           observations stored in the <b>fitMatrix</b> input                           argument. Possible values: <a href="https://www.mathworks.com/help/stats/linkage.html#d122e490032">https://www.mathworks.com/help/stats/linkage.html#d122e490032</a></p><p><i>nSimilarityClusters</i> - double; integer number of clusters to be                         found. Hierarchical binary-linkage tree will be                         pruned at that level.</p><p><b>fitMatrix</b> - double 2D-array containing data to be clustered.               Size: N x D, where N is the number of observations to be               clustered and D is the number of dimensions /               variables. In the context of Spectral Fingerprinting it is               called "fitMatrix" because it contains ROI-to-ROI fitness               values. See: "Similarity across Areas" section in A. Keitel               and J. Gross, &#8220;Individual human brain areas can be identified               from their characteristic spectral activation fingerprints,&#8221;               PLoS Biol, vol. 14, no. 6, p. e1002498, 2016.</p><h2 id="4">Outputs</h2><p><b>binaryLinkage</b> - struct with fields:</p><p><i>Linkage</i> - output of the MATLAB function linkage. Details: <a href="https://www.mathworks.com/help/stats/linkage.html#mw_8be7e070-3def-4f14-8875-d74a0e9b5f94">https://www.mathworks.com/help/stats/linkage.html#mw_8be7e070-3def-4f14-8875-d74a0e9b5f94</a></p><p><i>hierarchicalClusterTreeLeafs</i> - double 2D-array that contain cluster                                  indices linked in pairs to form a binary tree.</p><p><i>TreeFull.leafNodesIndices</i> - double 1D-array with leaf node numbers for                               each data point in the original data set                               (refers to full binary tree). See: <a href="https://www.mathworks.com/help/stats/dendrogram.html#d122e231482">https://www.mathworks.com/help/stats/dendrogram.html#d122e231482</a></p><p><i>TreeTruncated.leafNodesIndices</i> - double 1D-array with leaf node numbers for                                    each data point in the original data set                                    (refers to full binary tree truncated at                                    level <b>cfg.nSimilarityClusters</b>). to                                    find out which data points are contained                                    in leaf node k of the dendrogram plot,                                    use find(T==k). See: <a href="https://www.mathworks.com/help/stats/dendrogram.html#d122e231482">https://www.mathworks.com/help/stats/dendrogram.html#d122e231482</a></p><p><i>nSimilarityClusters</i> - same as input <b>stageConfig.nSimilarityClusters</b>.</p><p><i>simClusterInfo.indices</i> - (optional) cell array with double 1D-arrays (one                            cell per cluster) containing indices of                            observations that fell into given                            cluster. Present only if                            <b>cfg.observationsLabels</b> field exist.</p><p><i>simClusterInfo.label</i> - (optional) cell array with chars (one cell per                          cluster) containing names of observations that                          fell into given cluster. Present only if                            <b>cfg.observationsLabels</b> field exist.</p><pre class="codeinput"><span class="keyword">if</span>(~isfield(cfg, <span class="string">'goodRows'</span>)) error(<span class="string">'Missing goodRows field in cfg argument !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'goodCols'</span>)) error(<span class="string">'Missing goodCols field in cfg argument !'</span>); <span class="keyword">end</span>
+
+fitMatrixGood = fitMatrix(cfg.goodRows, cfg.goodCols);
+
+<span class="comment">% handle NaN values before linkage</span>
+fitMatrixGood(isnan(fitMatrixGood))=100*max(max(fitMatrixGood));
+
+Z = linkage(fitMatrixGood, <span class="keyword">...</span>
+    stageConfig.linkageMethod, <span class="keyword">...</span>
+    stageConfig.linkageDistanceMetric);
+
+figure(<span class="string">'visible'</span>, <span class="string">'off'</span>) <span class="comment">% to catch figure of tree from dendrogram (prevent display)</span>
+[~, T_trunc]    = dendrogram(Z, stageConfig.nSimilarityClusters); close;
+figure(<span class="string">'visible'</span>, <span class="string">'off'</span>) <span class="comment">% to catch figure of tree from dendrogram (prevent display)</span>
+[~, T_full]     = dendrogram(Z, 0); close;
+
+binaryLinkage.Linkage                          = Z; <span class="comment">% full linkage</span>
+binaryLinkage.hierarchicalClusterTreeLeafs     = Z(:, 1:2); <span class="comment">% description of numbers here : https://www.mathworks.com/help/stats/linkage.html#d120e466848</span>
+binaryLinkage.TreeFull.leafNodesIndices        = T_full;
+binaryLinkage.TreeTruncated.leafNodesIndices   = T_trunc;
+binaryLinkage.nSimilarityClusters              = stageConfig.nSimilarityClusters;
+
+
+<span class="comment">% add info about linked ROIs for easier interpretation</span>
+<span class="keyword">if</span>(isfield(cfg, <span class="string">'observationsLabels'</span>))
+
+    binaryLinkage.simClusterInfo = [];
+    <span class="keyword">for</span> iSimCluster = 1:binaryLinkage.nSimilarityClusters
+	binaryLinkage.simClusterInfo.indices{iSimCluster} = cfg.goodRows(find(binaryLinkage.TreeTruncated.leafNodesIndices == iSimCluster));
+	binaryLinkage.simClusterInfo.label{iSimCluster}   = {cfg.observationsLabels{binaryLinkage.simClusterInfo.indices{iSimCluster}}}';
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function binaryLinkage = binaryLinkageAnalysis(cfg, stageConfig, fitMatrix)
+%%
+% Performs hierarchical agglomerative hierarchical clustering on the input
+% data matrix.
+%
+% References:
+% [1] "Similarity across Areas" section in A. Keitel and J. Gross,
+% “Individual human brain areas can be identified from their characteristic
+% spectral activation fingerprints,” PLoS Biol, vol. 14, no. 6, p. e1002498,
+% 2016.
+%
+% [2] MATLAB Documentation about linkage function:
+% https://www.mathworks.com/help/stats/linkage.html
+%% Inputs
+% *cfg* - struct with fields:
+%
+% _goodRows_ - double; 1D-array with positive integers meaning rows to be
+%              selected from *fitMatrix* to perform the linkage.
+%
+% _goodCols_ - double; 1D-array with positive integers meaning colums to be
+%              selected from *fitMatrix* to perform the linkage.
+%
+% _observationsLabels_ - (optional) cell array with names describing each of
+%                        the observation to be clustered.
+%
+% *stageConfig* - struct representing STAGE_8 configuration. Used fields:
+%
+% _linkageMethod_ - char; name of the method to be used. Possible values:
+% https://www.mathworks.com/help/stats/linkage.html#mw_59e9693d-3784-4a0d-89dd-5dd020a605b2
+%
+% _linkageDistanceMetric_ - char; name of the metric to be used to compare
+%                           observations stored in the *fitMatrix* input
+%                           argument. Possible values:
+% https://www.mathworks.com/help/stats/linkage.html#d122e490032
+%
+% _nSimilarityClusters_ - double; integer number of clusters to be
+%                         found. Hierarchical binary-linkage tree will be
+%                         pruned at that level.
+%
+% *fitMatrix* - double 2D-array containing data to be clustered.
+%               Size: N x D, where N is the number of observations to be
+%               clustered and D is the number of dimensions /
+%               variables. In the context of Spectral Fingerprinting it is
+%               called "fitMatrix" because it contains ROI-to-ROI fitness
+%               values. See: "Similarity across Areas" section in A. Keitel
+%               and J. Gross, “Individual human brain areas can be identified
+%               from their characteristic spectral activation fingerprints,”
+%               PLoS Biol, vol. 14, no. 6, p. e1002498, 2016.
+%% Outputs
+% *binaryLinkage* - struct with fields:
+%
+% _Linkage_ - output of the MATLAB function linkage. Details:
+% https://www.mathworks.com/help/stats/linkage.html#mw_8be7e070-3def-4f14-8875-d74a0e9b5f94
+%
+% _hierarchicalClusterTreeLeafs_ - double 2D-array that contain cluster
+%                                  indices linked in pairs to form a binary tree.
+%
+% _TreeFull.leafNodesIndices_ - double 1D-array with leaf node numbers for
+%                               each data point in the original data set
+%                               (refers to full binary tree). See:
+% https://www.mathworks.com/help/stats/dendrogram.html#d122e231482
+%
+% _TreeTruncated.leafNodesIndices_ - double 1D-array with leaf node numbers for
+%                                    each data point in the original data set
+%                                    (refers to full binary tree truncated at
+%                                    level *cfg.nSimilarityClusters*). to
+%                                    find out which data points are contained
+%                                    in leaf node k of the dendrogram plot,
+%                                    use find(T==k). See:
+% https://www.mathworks.com/help/stats/dendrogram.html#d122e231482
+%
+% _nSimilarityClusters_ - same as input *stageConfig.nSimilarityClusters*.
+%
+% _simClusterInfo.indices_ - (optional) cell array with double 1D-arrays (one
+%                            cell per cluster) containing indices of
+%                            observations that fell into given
+%                            cluster. Present only if
+%                            *cfg.observationsLabels* field exist.
+%
+% _simClusterInfo.label_ - (optional) cell array with chars (one cell per
+%                          cluster) containing names of observations that
+%                          fell into given cluster. Present only if
+%                            *cfg.observationsLabels* field exist.
+%%
+
+if(~isfield(cfg, 'goodRows')) error('Missing goodRows field in cfg argument !'); end
+if(~isfield(cfg, 'goodCols')) error('Missing goodCols field in cfg argument !'); end
+
+fitMatrixGood = fitMatrix(cfg.goodRows, cfg.goodCols);
+
+% handle NaN values before linkage
+fitMatrixGood(isnan(fitMatrixGood))=100*max(max(fitMatrixGood));
+
+Z = linkage(fitMatrixGood, ...
+    stageConfig.linkageMethod, ...
+    stageConfig.linkageDistanceMetric);
+
+figure('visible', 'off') % to catch figure of tree from dendrogram (prevent display)
+[~, T_trunc]    = dendrogram(Z, stageConfig.nSimilarityClusters); close;
+figure('visible', 'off') % to catch figure of tree from dendrogram (prevent display)
+[~, T_full]     = dendrogram(Z, 0); close;
+
+binaryLinkage.Linkage                          = Z; % full linkage
+binaryLinkage.hierarchicalClusterTreeLeafs     = Z(:, 1:2); % description of numbers here : https://www.mathworks.com/help/stats/linkage.html#d120e466848
+binaryLinkage.TreeFull.leafNodesIndices        = T_full;
+binaryLinkage.TreeTruncated.leafNodesIndices   = T_trunc;
+binaryLinkage.nSimilarityClusters              = stageConfig.nSimilarityClusters;
+
+
+% add info about linked ROIs for easier interpretation
+if(isfield(cfg, 'observationsLabels'))
+
+    binaryLinkage.simClusterInfo = [];
+    for iSimCluster = 1:binaryLinkage.nSimilarityClusters
+	binaryLinkage.simClusterInfo.indices{iSimCluster} = cfg.goodRows(find(binaryLinkage.TreeTruncated.leafNodesIndices == iSimCluster));
+	binaryLinkage.simClusterInfo.label{iSimCluster}   = {cfg.observationsLabels{binaryLinkage.simClusterInfo.indices{iSimCluster}}}';
+    end
+
+end
+
+##### SOURCE END #####
+--></body></html>

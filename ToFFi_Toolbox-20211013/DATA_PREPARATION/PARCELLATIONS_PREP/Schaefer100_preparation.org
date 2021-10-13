@@ -1,0 +1,46 @@
+This file describes how we prepared Schaefer functional parcellation to be used in Spectral Fingerprinting.
+
+* REFERENCES 
+To learn about how this parcellation was designed read:
+
+1. A. Schaefer et al., “Local-Global Parcellation of the Human Cerebral Cortex from Intrinsic Functional Connectivity MRI,” Cereb. Cortex, vol. 28, no. 9, pp. 3095–3114, 01 2018, doi: 10.1093/cercor/bhx179.
+2. B. T. T. Yeo et al., “The organization of the human cerebral cortex estimated by intrinsic functional connectivity,” J. Neurophysiol., vol. 106, no. 3, pp. 1125–1165, Sep. 2011, doi: 10.1152/jn.00338.2011.
+
+For details and updates on the original Schaefer parcellation check the following repository - https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal
+
+
+* INSTRUCTIONS
+1. Following files were downloaded from https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal/Parcellations/MNI : 
+   - Schaefer2018_100Parcels_7Networks_order_FSLMNI152_2mm.nii.gz 
+   - Schaefer2018_100Parcels_7Networks_order.txt
+
+2. In Schaefer2018_100Parcels_7Networks_order.txt :
+   1. Four last columns were deleted.
+   2. Copied second column (so copy becomes the third column).
+   3. In the third column following substitutions were made:
+	  - 'Vis'          -->  'VIS'
+      - 'SomMot'       -->  'SMN'
+      - 'DorsAttn'     -->  'DAN'
+      - 'SalVentAttn'  -->  'CON' [fn:1]
+      - 'Limbic'       -->  'LIM'
+      - 'Cont'         -->  'FPN' [fn:2]
+      - 'Default'      -->  'DMN'
+   4. In third column '7Networks_' string was removed from every row.
+   5. In third column hemisphere codes ('LH', 'RH') were swapped with network codes (e.g. LH_FPN_pCun_1 --> FPN_LH_pCun_1)
+   6. First column was moved to be the last column.
+
+3. Renamed 'Schaefer2018_100Parcels_7Networks_order_FSLMNI152_2mm.nii.gz' to 'Schaefer2018_100Parcels_7Networks_order_ATLAS.nii.gz' in order to make a clear distinction from its original.
+4. Renamed 'Schaefer2018_100Parcels_7Networks_order.txt' to 'Schaefer2018_100Parcels_7Networks_order_ATLAS.nii.txt' to be matched with proper nii.gz file by Fieldtrip by ft_read_atlas.m during operation of prepareSchaefer100Atlas.m routine.
+
+5. Copied both renamed files to ./commonData/ directory
+
+6. Lastly it was interpolated on common template 8mm grid coordinates, so each 8mm^3 voxel inside the human brain was given ROI label it belongs to. This last step is done by prepareSchaefer100Atlas.m function that is called during configuration of the Spectral Fingerprinting script.
+
+
+* Footnotes
+
+[fn:1] This network has inconsistent nomenclature in the literature. Schaefer called it "Salience-Ventral-Attention", but we were more likely to call it Cingulo-Opercular Network (thus "CON"). Cingulo-Opercular Network emerged in the paper of Dosenbach et al. (2007) "Distinct brain networks for adaptive and stable task control in humans". "CON" abbreviation was used in Igelström & Graziano (2017) "The inferior parietal lobule and temporoparietal junction: A network perspective" and also by Ito et al. (2017) "Cognitive task information is transferred between brain regions via resting-state network topology".
+
+[fn:2] 
+Schaffer called it "Control" (thus "Cont"), but in the literature it is called Fronto-Parietal Network or Frontoparietal Control Network (thus FPN) more frequently. Vincent with collaborators described in 2008 their discovery of Fronto-Parietal Network writing "Evidence for a Frontoparietal Control System Revealed by Intrinsic Functional Connectivity" paper. FPCN and FPN abbreviations were used in the following articles: Dixon et al. (2018) "Heterogeneity within the frontoparietal control network and its relationship to the default and dorsal attention networks", Ito et al. (2017) "Cognitive task information is transferred between brain regions via resting-state network topology".
+

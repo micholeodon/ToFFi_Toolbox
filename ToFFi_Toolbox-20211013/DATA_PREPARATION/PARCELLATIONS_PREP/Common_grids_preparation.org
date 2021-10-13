@@ -1,0 +1,34 @@
+This file describes how to prepare template grids (source models) to be used in the source reconstruction.
+
+* PREPARATION
+It is assumed that HCP data is downloaded somewhere ('anatomy' directory) and it has following structure and obligatory files (example for two subjects '100307' and '111514'):
+
+/home/johndoe/HCP_data/
+                   ├── 100307
+                   │   ├── MEG
+                   │   │   ├── anatomy
+                   │   │   │   ├── 100307_MEG_anatomy_sourcemodel_3d8mm.mat
+                   ├── 111514
+                   │   ├── MEG
+                   │   │   ├── anatomy
+                   │   │   │   ├── 111514_MEG_anatomy_sourcemodel_3d8mm.mat
+
+* INSTRUCTIONS
+
+1. Open MATLAB and set its working directory to the directory containing common_grid_prep.m file.
+2. Open common_grid_prep.m file to edit it.
+3. Set 'subjectAnatomyPath' variable to path to the anatomy directory of any of the downloaded HCP subjects, e.g. for subject 111514 it can look like this:
+
+#+BEGIN_SRC matlab
+subjectAnatomyPath = '/home/johndoe/HCP_DATA/111514/MEG/anatomy/'
+#+END_SRC
+ 
+4. Set 'subCode' equal to the subject code, e.g. '111514' (note apostrophes):
+
+#+BEGIN_SRC matlab
+subjectAnatomyPath = '/home/johndoe/HCP_DATA/111514/MEG/anatomy/'
+subCode = '111514'
+#+END_SRC
+
+5. Run common_grid_prep.m script.
+6. Ready template file templategrid_HCP_8mm.mat can be found in ../../commonData/ directory.

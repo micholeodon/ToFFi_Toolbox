@@ -1,0 +1,423 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>gaussianMixtureModelling</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="gaussianMixtureModelling.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li><li><a href="#4">Outputs</a></li><li><a href="#6">Check whether number of points is enough to start EM algorithm</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> inputStructure = gaussianMixtureModelling(cfg, inputStructure)
+</pre><p>Performs soft-clustering using EM algorithm and next hard clustering on the result. Uses standard MATLAB fitgmdist and cluster routines with additional initial sorting (result is invariant to the order of rows of the data matrix). Estimates input data distribution by the Gaussian Mixture Model.</p><h2 id="3">Inputs</h2><p><b>cfg</b> - struct with fields:</p><p><i>regularization</i> - double; real number &#955; between 0 and 1. Represents amount                    of regularization to be applied to covariance                    matrices. At the end of each iteration of the EM                    algorithm, &#955; is added to every diagonal element of the                    covariance matrix (track <i>regVal</i> variable inside                    gmcluster_learn function inside gmcluster routine called                    by gmdistribution.fit inside fitgmdist.m MATLAB function).</p><p><i>nClusters</i> - double; integer number of clusters to be found in the data.</p><p><i>dataFieldName</i> - char; name of the field in the <b>inputStructure</b>                   containing data matrix to be clustered</p><p><i>prefixToFields</i> - (optional) char; prefix that will be added at the                    beginning of each new field created in the                    <b>inputStructure</b>, e.g. if <i>prefixToFields</i> = 'lvl2_',                    following fields will be added to <b>inputStructure</b>:                    <i>lvl2_gmm_gmClassInstance</i>                    <i>lvl2_gmm_didGmmConverge</i>                    <i>lvl2_gmm_centroids</i>                    <i>lvl2_gmm_pointsMembership</i></p><p><i>startClustersFieldName</i> - double; 1D-array containing initial cluster index                            for each of the points to be clustered in the                            input data matrix. Should contain values from 1                            to cfg.nClusters.</p><p><i>initialModel</i> - struct with initial gaussian mixture model. Should contain                  fields: <i>mu</i>, <i>Sigma</i> and <i>PComponents</i> (aka                  <i>ComponentProportion</i>). For details see "Distribution                  Parameters" section at:                  <a href="https://www.mathworks.com/help/stats/gmdistribution.html#d122e402597">https://www.mathworks.com/help/stats/gmdistribution.html#d122e402597</a>)</p><p><i>logPath</i> - (optional) path to the log file to be created that store             information about subjects and ROI for which EM algoritm not             converged. If this field present, also additional cfg fields             becomes obligatory: logColValues (values to append for each             column), logColNames (cell array of columns names). See             globalFunctionsScripts/logNotConverged.m for details.</p><p><b>inputStructure</b> - struct with two obligatory fields:                    1) First containing data to be clustered. This data                    field should have same name as name stored in                    <b>cfg.dataFieldName</b>. Data should be a double 2D-array of                    size N x D, where N is the number of observations to be                    clustered and D is the number of dimensions /                    variables.                    2) Second containing initial clusters indices for each                    input point to be clustered. Should be double 1D-array                    with N values, where N is the number of observations to be                    clustered. This data field should have same name as name                    stored in <b>cfg.startClustersFieldName</b>.</p><h2 id="4">Outputs</h2><p><b>inputStructure</b> - same struct as in input but containing additional fields:</p><pre>   _gmm_gmClassInstance_ - object that stores a Gaussian mixture model
+                           (GMM), which is a multivariate distribution
+                           that consists of multivariate Gaussian
+                           distribution components. Further details:
+(https://www.mathworks.com/help/stats/gmdistribution.html)</pre><pre>   _gmm_didGmmConverge_ - double; 0 (EM algorithm did not converge) or 1 (EM
+                          algorithm has converged)</pre><pre>   _gmm_centroids_ - double; 2D-array of size cfg.nClusters x D, where D
+                     is the number of dimensions / variables. Each row
+                     contain single gaussian component center. Equals to
+                     _gmm_gmClassInstance.mu_.</pre><pre>   _gmm_pointsMembership_ - double; 1D-array containing cluster index
+                            for each of the clustered points in the
+                            input data matrix. Contains values from 1
+                            to cfg.nClusters.</pre><pre class="codeinput">disp(<span class="string">'Gaussian Mixture modelling ...'</span>)
+
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'regularization'</span>))         error(<span class="string">'Missing field regularization in cfg input argument !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'nClusters'</span>))              error(<span class="string">'Missing field nClusters in cfg input argument !'</span>);  <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'dataFieldName'</span>))          error(<span class="string">'Missing field dataFieldName in cfg input argument !'</span>);  <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'startClustersFieldName'</span>)) error(<span class="string">'Missing field startClustersFieldName in cfg input argument !'</span>);  <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'initialModel'</span>))
+    isInitModelProvided = 0;
+<span class="keyword">else</span>
+
+    isInitModelProvided = 1;
+    <span class="keyword">if</span>(~isstruct(cfg.initialModel)) error(<span class="string">'ERROR: cfg.initialModel should be a structure with fields mu, Sigma, PComponents !'</span>); <span class="keyword">end</span>
+    <span class="keyword">if</span>(~isfield(cfg.initialModel, <span class="string">'mu'</span>)) error(<span class="string">'ERROR: cfg.initialModel should be a structure with fields mu, Sigma, PComponents !'</span>); <span class="keyword">end</span>
+    <span class="keyword">if</span>(~isfield(cfg.initialModel, <span class="string">'Sigma'</span>)) error(<span class="string">'ERROR: cfg.initialModel should be a structure with fields mu, Sigma, PComponents !'</span>); <span class="keyword">end</span>
+    <span class="keyword">if</span>(~isfield(cfg.initialModel, <span class="string">'PComponents'</span>)) error(<span class="string">'ERROR: cfg.initialModel should be a structure with fields mu, Sigma, PComponents !'</span>); <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'prefixToFields'</span>))
+    prefix = <span class="string">''</span>;
+<span class="keyword">elseif</span>(isempty(cfg.prefixToFields))
+    prefix = <span class="string">''</span>;
+<span class="keyword">else</span>
+    prefix = cfg.prefixToFields;
+<span class="keyword">end</span>
+
+<span class="comment">% Gaussian Mixture clustering; uses k-means cluster as starting point</span>
+inputStructure.([prefix, <span class="string">'gmm_centroids'</span>])          = []; <span class="comment">% to be filled</span>
+inputStructure.([prefix, <span class="string">'gmm_pointsMembership'</span>])   = [];
+inputStructure.([prefix, <span class="string">'gmm_gmClassInstance'</span>])    = [];
+inputStructure.([prefix, <span class="string">'gmm_didGmmConverge'</span>])    = -1; <span class="comment">% initially assuming that not valid</span>
+
+pointsToCluster         = inputStructure.(cfg.dataFieldName);
+initialClustersIndices = inputStructure.(cfg.startClustersFieldName);
+
+options   = statset(<span class="string">'Display'</span>,<span class="string">'final'</span>,<span class="string">'MaxIter'</span>,1000);
+
+nDim = size(pointsToCluster, 2);
+N   = size(pointsToCluster, 1);
+</pre><h2 id="6">Check whether number of points is enough to start EM algorithm</h2><p>- if not then compute GM straight from the data in one step</p><pre class="codeinput"><span class="keyword">if</span>(N &lt;= cfg.nClusters)
+    error(<span class="string">'Error: There should be more points to cluster than demanded number of clusters !'</span>);
+<span class="keyword">else</span>
+    <span class="keyword">if</span> N &gt; nDim
+	usingOneShotMethod = 0;
+	disp(<span class="string">'N &gt; nDim  =&gt; using EM algorithm to fit GMM ...'</span>)
+
+	<span class="keyword">if</span>(isInitModelProvided)
+	    gmClassInstance = fitgmdist(pointsToCluster, cfg.nClusters,  <span class="keyword">...</span>
+		<span class="string">'Options'</span>,      options, <span class="keyword">...</span>
+		<span class="string">'Regularize'</span>,   cfg.regularization, <span class="keyword">...</span>
+		<span class="string">'Start'</span>,        cfg.initialModel);
+	<span class="keyword">else</span>
+	    gmClassInstance = fitgmdist(pointsToCluster, cfg.nClusters,  <span class="keyword">...</span>
+		<span class="string">'Start'</span>,        initialClustersIndices, <span class="keyword">...</span>
+		<span class="string">'Options'</span>,      options, <span class="keyword">...</span>
+		<span class="string">'Regularize'</span>,   cfg.regularization );
+	    <span class="comment">% INITIAL VALUES of MU, SIGMA and PComponents (see lines 536-544 in</span>
+	    <span class="comment">% MATLAB/toolbox/stats/stats/@gmdistribution/private/gmcluster.m)</span>
+	    <span class="comment">%</span>
+	    <span class="comment">% Cluster indices are from k=1:K</span>
+	    <span class="comment">% For each k:</span>
+	    <span class="comment">% 1. X0 matrix of all points with label == k (each row is single point)</span>
+	    <span class="comment">% 2. Compute mean across rows to get mu_k</span>
+	    <span class="comment">% 3. X0 = X0 - mu_k  (center the matrix)</span>
+	    <span class="comment">% 4. Compute non-regularized covariance matrix Sigma = X0' * X0</span>
+	    <span class="comment">% 5. Divide by total number of points and add regularization by \lambda * identity matrix:</span>
+	    <span class="comment">%       Sigma = Sigma/n +  lambda * I;</span>
+	    <span class="comment">% 6. Proporion PComponents is given by the ratio:</span>
+	    <span class="comment">%       p_k = (number of points with label k) / n</span>
+
+	<span class="keyword">end</span> <span class="comment">% if(isInitModelProvided)</span>
+
+    <span class="keyword">else</span>
+	usingOneShotMethod = 1;
+	warning(<span class="string">'N &lt;= nDim  =&gt; using initial clustering to estimate GMM in one step ...'</span>)
+	<span class="keyword">if</span>(~isInitModelProvided)
+	    error(<span class="string">'ERROR! Provide structure cfg.initialModel with fields: mu with initial centroids (e.g. from k-means), Sigma empty, PComponents empty !'</span>)
+	<span class="keyword">end</span>
+
+	mu  = zeros(cfg.nClusters, nDim);
+	S   = zeros(nDim, nDim, cfg.nClusters);
+	A   = zeros(1,cfg.nClusters);
+	<span class="keyword">for</span> iClust = 1:cfg.nClusters
+	    idx = find(initialClustersIndices == iClust)';
+	    Xcl = pointsToCluster(idx,:);
+	    Ncl = size(Xcl,1);
+
+	    <span class="comment">% mu</span>
+	    mu(iClust,:) = cfg.initialModel.mu(iClust,:);
+	    <span class="comment">% proportion (not need to be in cfg.initialModel so model from kmeans will suffice)</span>
+	    A(iClust) = Ncl/N;
+	    <span class="comment">% covMatrix (not need to be in cfg.initialModel so model from kmeans will suffice)</span>
+	    S(:,:,iClust) = cov(Xcl) + cfg.regularization*eye(nDim);
+
+	<span class="keyword">end</span> <span class="comment">% iClust</span>
+
+	gmClassInstance = gmdistribution(mu, S, A)
+    <span class="keyword">end</span> <span class="comment">% if N &gt; nDim</span>
+
+<span class="keyword">end</span> <span class="comment">% if N &lt;= cfg.nClusters</span>
+</pre><pre class="codeinput"><span class="comment">% sort components (helps averaging and reproducibility)</span>
+[sorted_mu, idx]    = sortrows(gmClassInstance.mu);
+sorted_Sigma        = gmClassInstance.Sigma(:,:, idx);
+sorted_PComponents  = gmClassInstance.PComponents(idx);
+<span class="keyword">if</span> usingOneShotMethod
+    didConverge    = 1;
+<span class="keyword">else</span>
+    didConverge    = gmClassInstance.Converged;
+<span class="keyword">end</span>
+gmClassInstance = gmdistribution(sorted_mu, sorted_Sigma, sorted_PComponents);
+
+<span class="keyword">if</span>(isfield(cfg, <span class="string">'logPath'</span>))
+    <span class="keyword">if</span>(didConverge == 0)
+	cfgLog = [];
+	cfgLog.colValues = cfg.logColValues;
+	cfgLog.colNames = cfg.logColNames;
+	cfgLog.logPath  = cfg.logPath;
+	logNotConverged(cfgLog)
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+inputStructure.([prefix, <span class="string">'gmm_gmClassInstance'</span>])    = gmClassInstance;
+inputStructure.([prefix, <span class="string">'gmm_didGmmConverge'</span>])    = didConverge;
+inputStructure.([prefix, <span class="string">'gmm_centroids'</span>])          = gmClassInstance.mu;
+inputStructure.([prefix, <span class="string">'gmm_pointsMembership'</span>])   = cluster(gmClassInstance, pointsToCluster);
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function inputStructure = gaussianMixtureModelling(cfg, inputStructure)
+%%
+% Performs soft-clustering using EM algorithm and next hard clustering on the
+% result. Uses standard MATLAB fitgmdist and cluster routines with additional
+% initial sorting (result is invariant to the order of rows of the data
+% matrix). Estimates input data distribution by the Gaussian Mixture Model.
+%% Inputs
+% *cfg* - struct with fields:
+%
+% _regularization_ - double; real number λ between 0 and 1. Represents amount
+%                    of regularization to be applied to covariance
+%                    matrices. At the end of each iteration of the EM
+%                    algorithm, λ is added to every diagonal element of the
+%                    covariance matrix (track _regVal_ variable inside
+%                    gmcluster_learn function inside gmcluster routine called
+%                    by gmdistribution.fit inside fitgmdist.m MATLAB function).
+%
+% _nClusters_ - double; integer number of clusters to be found in the data.
+%
+% _dataFieldName_ - char; name of the field in the *inputStructure*
+%                   containing data matrix to be clustered
+%
+% _prefixToFields_ - (optional) char; prefix that will be added at the
+%                    beginning of each new field created in the
+%                    *inputStructure*, e.g. if _prefixToFields_ = 'lvl2_',
+%                    following fields will be added to *inputStructure*:
+%                    _lvl2_gmm_gmClassInstance_
+%                    _lvl2_gmm_didGmmConverge_
+%                    _lvl2_gmm_centroids_
+%                    _lvl2_gmm_pointsMembership_
+%
+% _startClustersFieldName_ - double; 1D-array containing initial cluster index
+%                            for each of the points to be clustered in the
+%                            input data matrix. Should contain values from 1
+%                            to cfg.nClusters.
+%
+% _initialModel_ - struct with initial gaussian mixture model. Should contain
+%                  fields: _mu_, _Sigma_ and _PComponents_ (aka
+%                  _ComponentProportion_). For details see "Distribution
+%                  Parameters" section at:
+%                  https://www.mathworks.com/help/stats/gmdistribution.html#d122e402597)
+%
+% _logPath_ - (optional) path to the log file to be created that store
+%             information about subjects and ROI for which EM algoritm not
+%             converged. If this field present, also additional cfg fields
+%             becomes obligatory: logColValues (values to append for each
+%             column), logColNames (cell array of columns names). See
+%             globalFunctionsScripts/logNotConverged.m for details.
+%
+% *inputStructure* - struct with two obligatory fields:
+%                    1) First containing data to be clustered. This data
+%                    field should have same name as name stored in
+%                    *cfg.dataFieldName*. Data should be a double 2D-array of
+%                    size N x D, where N is the number of observations to be
+%                    clustered and D is the number of dimensions /
+%                    variables.
+%                    2) Second containing initial clusters indices for each
+%                    input point to be clustered. Should be double 1D-array
+%                    with N values, where N is the number of observations to be
+%                    clustered. This data field should have same name as name
+%                    stored in *cfg.startClustersFieldName*.
+%% Outputs
+% *inputStructure* - same struct as in input but containing additional fields:
+%
+%     _gmm_gmClassInstance_ - object that stores a Gaussian mixture model
+%                             (GMM), which is a multivariate distribution
+%                             that consists of multivariate Gaussian
+%                             distribution components. Further details:
+% (https://www.mathworks.com/help/stats/gmdistribution.html)
+%
+%     _gmm_didGmmConverge_ - double; 0 (EM algorithm did not converge) or 1 (EM
+%                            algorithm has converged)
+%
+%     _gmm_centroids_ - double; 2D-array of size cfg.nClusters x D, where D
+%                       is the number of dimensions / variables. Each row
+%                       contain single gaussian component center. Equals to
+%                       _gmm_gmClassInstance.mu_.
+%
+%     _gmm_pointsMembership_ - double; 1D-array containing cluster index
+%                              for each of the clustered points in the
+%                              input data matrix. Contains values from 1
+%                              to cfg.nClusters.
+%%
+
+disp('Gaussian Mixture modelling ...')
+
+if(~isfield(cfg, 'regularization'))         error('Missing field regularization in cfg input argument !'); end
+if(~isfield(cfg, 'nClusters'))              error('Missing field nClusters in cfg input argument !');  end
+if(~isfield(cfg, 'dataFieldName'))          error('Missing field dataFieldName in cfg input argument !');  end
+if(~isfield(cfg, 'startClustersFieldName')) error('Missing field startClustersFieldName in cfg input argument !');  end
+if(~isfield(cfg, 'initialModel'))
+    isInitModelProvided = 0;
+else
+
+    isInitModelProvided = 1;
+    if(~isstruct(cfg.initialModel)) error('ERROR: cfg.initialModel should be a structure with fields mu, Sigma, PComponents !'); end
+    if(~isfield(cfg.initialModel, 'mu')) error('ERROR: cfg.initialModel should be a structure with fields mu, Sigma, PComponents !'); end
+    if(~isfield(cfg.initialModel, 'Sigma')) error('ERROR: cfg.initialModel should be a structure with fields mu, Sigma, PComponents !'); end
+    if(~isfield(cfg.initialModel, 'PComponents')) error('ERROR: cfg.initialModel should be a structure with fields mu, Sigma, PComponents !'); end
+end
+
+if(~isfield(cfg, 'prefixToFields'))
+    prefix = '';
+elseif(isempty(cfg.prefixToFields))
+    prefix = '';
+else
+    prefix = cfg.prefixToFields;
+end
+
+% Gaussian Mixture clustering; uses k-means cluster as starting point
+inputStructure.([prefix, 'gmm_centroids'])          = []; % to be filled
+inputStructure.([prefix, 'gmm_pointsMembership'])   = [];
+inputStructure.([prefix, 'gmm_gmClassInstance'])    = [];
+inputStructure.([prefix, 'gmm_didGmmConverge'])    = -1; % initially assuming that not valid
+
+pointsToCluster         = inputStructure.(cfg.dataFieldName);
+initialClustersIndices = inputStructure.(cfg.startClustersFieldName);
+
+options   = statset('Display','final','MaxIter',1000);
+
+nDim = size(pointsToCluster, 2);
+N   = size(pointsToCluster, 1);
+
+%% Check whether number of points is enough to start EM algorithm
+% - if not then compute GM straight from the data in one step
+if(N <= cfg.nClusters)
+    error('Error: There should be more points to cluster than demanded number of clusters !');
+else
+    if N > nDim
+	usingOneShotMethod = 0;
+	disp('N > nDim  => using EM algorithm to fit GMM ...')
+
+	if(isInitModelProvided)
+	    gmClassInstance = fitgmdist(pointsToCluster, cfg.nClusters,  ...
+		'Options',      options, ...
+		'Regularize',   cfg.regularization, ...
+		'Start',        cfg.initialModel);
+	else
+	    gmClassInstance = fitgmdist(pointsToCluster, cfg.nClusters,  ...
+		'Start',        initialClustersIndices, ...
+		'Options',      options, ...
+		'Regularize',   cfg.regularization );
+	    % INITIAL VALUES of MU, SIGMA and PComponents (see lines 536-544 in
+	    % MATLAB/toolbox/stats/stats/@gmdistribution/private/gmcluster.m)
+	    %
+	    % Cluster indices are from k=1:K
+	    % For each k:
+	    % 1. X0 matrix of all points with label == k (each row is single point)
+	    % 2. Compute mean across rows to get mu_k
+	    % 3. X0 = X0 - mu_k  (center the matrix)
+	    % 4. Compute non-regularized covariance matrix Sigma = X0' * X0
+	    % 5. Divide by total number of points and add regularization by \lambda * identity matrix:
+	    %       Sigma = Sigma/n +  lambda * I;
+	    % 6. Proporion PComponents is given by the ratio:
+	    %       p_k = (number of points with label k) / n
+
+	end % if(isInitModelProvided)
+
+    else
+	usingOneShotMethod = 1;
+	warning('N <= nDim  => using initial clustering to estimate GMM in one step ...')
+	if(~isInitModelProvided)
+	    error('ERROR! Provide structure cfg.initialModel with fields: mu with initial centroids (e.g. from k-means), Sigma empty, PComponents empty !')
+	end
+
+	mu  = zeros(cfg.nClusters, nDim);
+	S   = zeros(nDim, nDim, cfg.nClusters);
+	A   = zeros(1,cfg.nClusters);
+	for iClust = 1:cfg.nClusters
+	    idx = find(initialClustersIndices == iClust)';
+	    Xcl = pointsToCluster(idx,:);
+	    Ncl = size(Xcl,1);
+
+	    % mu
+	    mu(iClust,:) = cfg.initialModel.mu(iClust,:);
+	    % proportion (not need to be in cfg.initialModel so model from kmeans will suffice)
+	    A(iClust) = Ncl/N;
+	    % covMatrix (not need to be in cfg.initialModel so model from kmeans will suffice)
+	    S(:,:,iClust) = cov(Xcl) + cfg.regularization*eye(nDim);
+
+	end % iClust
+
+	gmClassInstance = gmdistribution(mu, S, A)
+    end % if N > nDim
+
+end % if N <= cfg.nClusters
+%%
+
+% sort components (helps averaging and reproducibility)
+[sorted_mu, idx]    = sortrows(gmClassInstance.mu);
+sorted_Sigma        = gmClassInstance.Sigma(:,:, idx);
+sorted_PComponents  = gmClassInstance.PComponents(idx);
+if usingOneShotMethod
+    didConverge    = 1;
+else
+    didConverge    = gmClassInstance.Converged;
+end
+gmClassInstance = gmdistribution(sorted_mu, sorted_Sigma, sorted_PComponents);
+
+if(isfield(cfg, 'logPath'))
+    if(didConverge == 0)
+	cfgLog = [];
+	cfgLog.colValues = cfg.logColValues;
+	cfgLog.colNames = cfg.logColNames;
+	cfgLog.logPath  = cfg.logPath;
+	logNotConverged(cfgLog)
+    end
+end
+
+inputStructure.([prefix, 'gmm_gmClassInstance'])    = gmClassInstance;
+inputStructure.([prefix, 'gmm_didGmmConverge'])    = didConverge;
+inputStructure.([prefix, 'gmm_centroids'])          = gmClassInstance.mu;
+inputStructure.([prefix, 'gmm_pointsMembership'])   = cluster(gmClassInstance, pointsToCluster);
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,166 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>checkDataAndFilter</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="checkDataAndFilter.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> checkDataAndFilter(data, spatialFilter)
+</pre><p>Function that checks if all necessary fields are present in the <b>data</b> structure and if there are any NaNs or Infs in the <b>spatialFilter</b>.</p><h2 id="3">Inputs</h2><p><b>data</b> - structure containing following fields:</p><p><i>trial</i> - cell containing 2D-arrays (sensors x time frames) signal values for           single epochs of the multichannel signal (time segments).</p><p><i>time</i> - cell containing 1D-arrays (1 x time frames) containing time          values for single epochs of the multichannel signal (time segments).</p><p><i>label</i> - cell containing names of the sensors (e.g. EEG electodes, MEG squids).</p><p><i>fsample</i> - double; sampling frequency in Hz</p><p><b>spatialFilter</b> - double; 2D-array which represents spatial filter                   coefficients used for reconstruction on brain activity                   from sensors signal (see e.g. Van Veen 1997 to learn                   about LCMV spatial filter)</p><pre class="codeinput">disp(<span class="string">'Checking data and filter ...'</span>)
+<span class="comment">% missing fields</span>
+<span class="keyword">if</span>(~isstruct(data)) error(<span class="string">'data input is not a structure !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(data, <span class="string">'trial'</span>)) error(<span class="string">'data: trial field missing'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(data, <span class="string">'time'</span>)) error(<span class="string">'data: time field missing'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(data, <span class="string">'label'</span>)) error(<span class="string">'data: label field missing'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(data, <span class="string">'fsample'</span>)) error(<span class="string">'data: fsample field missing'</span>); <span class="keyword">end</span>
+<span class="comment">% not a matrix</span>
+<span class="keyword">if</span>(~ismatrix(spatialFilter)) error(<span class="string">'filter input should be a matrix (numSources x numChannels) !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(~ismatrix(spatialFilter)) error(<span class="string">'filter input should be a matrix (numSources x numChannels) !'</span>); <span class="keyword">end</span>
+<span class="comment">% NaN-s</span>
+<span class="keyword">if</span>(any(any(isnan([data.trial{:}])))) error(<span class="string">'data: contains NaNs !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(any(any(isnan([data.time{:}])))) error(<span class="string">'data.time: contains NaNs !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(isnan(data.fsample)) error(<span class="string">'data.fsample: is NaNs !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(any(any(isnan(spatialFilter)))) error(<span class="string">'filter: contains NaNs !'</span>); <span class="keyword">end</span>
+<span class="comment">% Infinities</span>
+<span class="keyword">if</span>(any(any(isinf([data.trial{:}])))) error(<span class="string">'data: contains Infinities (Inf) !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(any(any(isinf([data.time{:}])))) error(<span class="string">'data.time: contains Infinities (Inf) !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(isinf(data.fsample)) error(<span class="string">'data.fsample: is Infinities (Inf) !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(any(any(isinf(spatialFilter)))) error(<span class="string">'filter: contains Infinities (Inf) !'</span>); <span class="keyword">end</span>
+
+
+<span class="comment">% if somebody accidentaly transposed matrix it could not match the data</span>
+<span class="comment">% try to multiply both ways to see which will work</span>
+<span class="keyword">try</span>
+    spatialFilter*data.trial{1};
+<span class="keyword">catch</span>
+    <span class="keyword">try</span>
+	spatialFilter'*data.trial{1};
+	error(<span class="string">'Transpose filter matrix before use!'</span>);
+    <span class="keyword">catch</span>
+	error(<span class="string">'data matrix and filter do not match ! Check them.'</span>)
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function checkDataAndFilter(data, spatialFilter)
+%%
+% Function that checks if all necessary fields are present in the *data*
+% structure and if there are any NaNs or Infs in the *spatialFilter*.
+%% Inputs
+% *data* - structure containing following fields:
+%
+% _trial_ - cell containing 2D-arrays (sensors x time frames) signal values for
+%           single epochs of the multichannel signal (time segments).
+%
+% _time_ - cell containing 1D-arrays (1 x time frames) containing time
+%          values for single epochs of the multichannel signal (time segments).
+%
+% _label_ - cell containing names of the sensors (e.g. EEG electodes, MEG squids).
+%
+% _fsample_ - double; sampling frequency in Hz
+%
+% *spatialFilter* - double; 2D-array which represents spatial filter
+%                   coefficients used for reconstruction on brain activity
+%                   from sensors signal (see e.g. Van Veen 1997 to learn
+%                   about LCMV spatial filter)
+%%
+
+disp('Checking data and filter ...')
+% missing fields
+if(~isstruct(data)) error('data input is not a structure !'); end
+if(~isfield(data, 'trial')) error('data: trial field missing'); end
+if(~isfield(data, 'time')) error('data: time field missing'); end
+if(~isfield(data, 'label')) error('data: label field missing'); end
+if(~isfield(data, 'fsample')) error('data: fsample field missing'); end
+% not a matrix
+if(~ismatrix(spatialFilter)) error('filter input should be a matrix (numSources x numChannels) !'); end
+if(~ismatrix(spatialFilter)) error('filter input should be a matrix (numSources x numChannels) !'); end
+% NaN-s
+if(any(any(isnan([data.trial{:}])))) error('data: contains NaNs !'); end
+if(any(any(isnan([data.time{:}])))) error('data.time: contains NaNs !'); end
+if(isnan(data.fsample)) error('data.fsample: is NaNs !'); end
+if(any(any(isnan(spatialFilter)))) error('filter: contains NaNs !'); end
+% Infinities
+if(any(any(isinf([data.trial{:}])))) error('data: contains Infinities (Inf) !'); end
+if(any(any(isinf([data.time{:}])))) error('data.time: contains Infinities (Inf) !'); end
+if(isinf(data.fsample)) error('data.fsample: is Infinities (Inf) !'); end
+if(any(any(isinf(spatialFilter)))) error('filter: contains Infinities (Inf) !'); end
+
+
+% if somebody accidentaly transposed matrix it could not match the data
+% try to multiply both ways to see which will work
+try
+    spatialFilter*data.trial{1};
+catch
+    try
+	spatialFilter'*data.trial{1};
+	error('Transpose filter matrix before use!');
+    catch
+	error('data matrix and filter do not match ! Check them.')
+    end
+end
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,84 @@
+These tools are used to obtain signal and spatial filter edible by Spectral Fingerprint algorithm.
+
+HCP data preparation routines are divided into four scripts:
+1. PREPROCESSING - reslice data into trials of given duration (e.g. 1000 ms per trial) and detrends each trial's signal;
+2. COVARIANCE_GEN - generates single covariance matrix (the average of the single-trial covariance matrices);
+3. LEAFIELD_GEN - generates two leadfields: first is a vector leadfield and second is a scalar leadfield; obtained from the vector leadfield by the SVD method (see "4.3. Scalar adaptive spatial filter: deriving the optimum source orientation" in Sekihara and Nagarajan 2008 book "Adaptive Spatial Filters for Electromagnetic Brain Imaging");
+4. LCMV_FILTER_GEN - combines generated covariance matrix and scalar leadfield into LCMV filter matrix.
+
+Alltogehter these scripts generates 6 files per subject (preprocessed signal, covariance matrix, two leadfields, LCMV filter matrix and a source structure).
+
+There is also fifth script called RENAMING_TOOL which serves for creating copy of selected data with converted names (changing subject codes into numbers and shorten file names if necessary).
+
+
+HOW TO USE THEM?
+
+It is assumed that HCP data is downloaded somewhere, let us say '/home/johndoe/HCP_data/'. This directory should have following structure and obligatory files (example for two subjects '100307' and '102816'). Note that there might be additional directories like provenance, figures, etc. Their presence will not harm anything. It is crucial to have at least the files shown below:
+
+./home/johndoe/HCP_data
+                   ├── 100307
+                   │   ├── MEG
+                   │   │   ├── anatomy
+                   │   │   │   ├── 100307_MEG_anatomy_headmodel.mat
+                   │   │   │   ├── 100307_MEG_anatomy_sourcemodel_3d8mm.mat
+                   │   │   ├── Restin
+                   │   │   │   └── rmegpreproc
+                   │   │   │       ├── 100307_MEG_3-Restin_rmegpreproc.mat
+                   │   │   │       ├── 100307_MEG_4-Restin_rmegpreproc.mat
+                   │   │   │       ├── 100307_MEG_5-Restin_rmegpreproc.mat
+                   ├── 102816
+                   │   ├── MEG
+                   │   │   ├── anatomy
+                   │   │   │   ├── 102816_MEG_anatomy_headmodel.mat
+                   │   │   │   ├── 102816_MEG_anatomy_sourcemodel_3d8mm.mat
+                   │   │   ├── Restin
+                   │   │   │   └── rmegpreproc
+                   │   │   │       ├── 102816_MEG_3-Restin_rmegpreproc.mat
+                   │   │   │       ├── 102816_MEG_4-Restin_rmegpreproc.mat
+                   │   │   │       ├── 102816_MEG_5-Restin_rmegpreproc.mat
+
+
+### WARNING! ###
+Inside the /home/johndoe/HCP_data/ directory there should not be any other files but directories named with the subject codes !
+################
+
+It is also assumed that user has working MATLAB software (R2021a recommended, or newer) and Fieltrip toolbox (revision 20210816 recommended, or newer) installed.
+
+Instructions:
+1. Setting common variables:
+   1. Open MATLAB and set its working directory to directory containing CommonInit.m file.
+   2. Open CommonInit.m file to edit it.
+   3. Set inputDataPath variable to path to the root of the tree above, e.g. '/home/johndoe/HCP_data/'.
+   4. Set fieldTripPath variable to path to the Fieltrip toolbox (directory containing ft_defaults.m).
+   5. Set nSub variable to desired number of subject to be processed. 
+2. PREPROCESSING:
+   1. Open MATLAB and set its working directory to directory containing PREPROCESSING.m file.
+   2. Open PREPROCESSING.m file to edit it.
+   3. Set doDetrending variable to 1 or 0 to deterend data in each trial or leave as it is, respectively.
+   4. Run PROCESSING.m script. Few minutes later there should be the first files of the new data inside the ../output/ directory. 
+3. COVARIANCE_GEN:
+   1. Set working directory to directory containing COVARIANCE_GEN.m file.
+   2. Open COVARIANCE_GEN.m file to edit it.
+   3. Set DO_DATA_COND variable to 1 or 0 to multiply data in each trial by 1e14 or leave as it is, respectively (by default equals 0).
+   4. Run COVARIANCE_GEN.m script. After it finished check if new data can be found in ../output/ directories.
+4. LEADFIELD_GEN:
+   1. Set working directory to directory containing LEADFIELD_GEN.m file.
+   2. Open LEADFIELD_GEN.m file to edit it.
+   3. Set dataType variable to 'EEG' or 'MEG' (this makes sure that for MEG data cfg.reducerank = 2 and for EEG data cfg.reducerank = 3 - explanation can be found here - https://mailman.science.ru.nl/pipermail/fieldtrip/2006-October/000664.html).
+   4. Run LEADFIELD_GEN.m script. After it finished check if new data can be found in ../output/ directories.
+5. LCMV_FILTER_GEN:
+   1. Set working directory to directory containing LCMV_FILTER_GEN.m file.
+   2. Open LCMV_FILTER_GEN.m file to edit it.
+   3. Run LCMV_FILTER_GEN.m script. After it finished check if new data can be found in ../output/ directories.
+6. RENAMING_TOOL:
+   1. Set working directory to directory containing RENAMING_TOOL.m file.
+   2. Set outputCfg.path variable to desired location of renamed files.
+   3. Set inputCfg.SubCodes variable to cell array containing codes of the subjects whose files you want to copy and rename.
+   4. Set outputCfg.SubCodes variable to cell array containing new codes of the subjects.
+   5. Set inputCfg.dataNames variable to cell array containing parts of the file names to be searched recursively in the inputCfg.path.
+   6. Set outputCfg.dataNames variable to cell array containing renamed parts of the file names. Files with inputCfg.dataNames{1} will copied and renamed as files with name outputCfg.dataNames{1}, inputCfg.dataNames{2} -> outputCfg.dataNames{1} and so on.
+   7. Set outputCfg.namesFormat variable to char with appropriate combination of 'name', 'subNum', 'subCode' and 'subNum' (can be delimited with underscore or other characters) to set desired naming comvention of the output files (see example in RENAMING_TOOL.m listed in the comments of this variable).
+   8. Run RENAMING_TOOL.m .
+   9. You will be shown list of files that will be copied with changed names. If everything is conforming to your needs write y and hit ENTER to proceed; if not - write n and hit ENTER and change selected cells content inside LIST_FILE_CHANGES variable. When you are satisfied run part of the script from line containing '%% PROCESS' string to the last line.
+   10. The files will be copied according to the plan coded in LIST_FILE_CHANGES variable. Log files with current date will be automatically created inside output directory. After script finished check if copied data can be found in desired directory (outputCfg.path variable). 
+

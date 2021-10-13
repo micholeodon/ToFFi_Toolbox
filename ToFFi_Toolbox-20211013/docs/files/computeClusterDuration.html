@@ -1,0 +1,136 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>computeClusterDuration</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="computeClusterDuration.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li><li><a href="#4">Outputs</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span>  individualFingerprint = computeClusterDuration(cfg, individualFingerprint)
+</pre><p>Calculates percentages of points belonging to each cluster.</p><h2 id="3">Inputs</h2><p><b>cfg</b> - struct; configuration with fields:</p><p><i>nSpectralModesPerROI</i> - double; integer number of clusters.</p><p><b>individualFingerprint</b> - struct with obligatory field:</p><p><i>trialsSpectralModeMembership</i> - double; 1D array containing cluster index                                  for each of the clustered points.</p><h2 id="4">Outputs</h2><p><b>individualFingerprint</b> - struct; Same as in input but extended with new field:</p><p><i>clusterDuration</i> - double; 1D-array containing percentages of points                     belonging to each cluster.</p><pre class="codeinput">disp(<span class="string">'Computing trial duration ...'</span>)
+
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'nSpectralModesPerROI'</span>)) error(<span class="string">'Missing field nSpectralModesPerROI in cfg input argument !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(individualFingerprint, <span class="string">'trialsSpectralModeMembership'</span>)) error(<span class="string">'Missing field trialsSpectralModeMembership in individualFingerprint input argument !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(~isstruct(individualFingerprint)) error(<span class="string">'individualFingerprint argument is not a struct !'</span>); <span class="keyword">end</span>
+
+
+clusterDuration             = zeros(1, cfg.nSpectralModesPerROI);
+trialsClustersMembership    = individualFingerprint.trialsSpectralModeMembership;
+
+<span class="keyword">if</span>(numel(trialsClustersMembership) == 0)
+    error(<span class="string">'trialsClustersMembership is empty !'</span>);
+<span class="keyword">end</span>
+
+<span class="keyword">for</span> iCluster = 1:cfg.nSpectralModesPerROI
+    clusterTrialsIndices        = find(trialsClustersMembership==iCluster);
+    clusterDuration(iCluster)   = length(clusterTrialsIndices);
+    clusterDuration(iCluster)   = clusterDuration(iCluster)/length(trialsClustersMembership)*100;
+<span class="keyword">end</span>
+
+individualFingerprint.clusterDuration = clusterDuration;
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function  individualFingerprint = computeClusterDuration(cfg, individualFingerprint)
+%%
+% Calculates percentages of points belonging to each cluster.
+%% Inputs
+% *cfg* - struct; configuration with fields:
+%
+% _nSpectralModesPerROI_ - double; integer number of clusters.
+%
+% *individualFingerprint* - struct with obligatory field:
+%
+% _trialsSpectralModeMembership_ - double; 1D array containing cluster index
+%                                  for each of the clustered points.
+%% Outputs
+% *individualFingerprint* - struct; Same as in input but extended with new field:
+%
+% _clusterDuration_ - double; 1D-array containing percentages of points
+%                     belonging to each cluster.
+%%
+
+disp('Computing trial duration ...')
+
+if(~isfield(cfg, 'nSpectralModesPerROI')) error('Missing field nSpectralModesPerROI in cfg input argument !'); end
+if(~isfield(individualFingerprint, 'trialsSpectralModeMembership')) error('Missing field trialsSpectralModeMembership in individualFingerprint input argument !'); end
+if(~isstruct(individualFingerprint)) error('individualFingerprint argument is not a struct !'); end
+
+
+clusterDuration             = zeros(1, cfg.nSpectralModesPerROI);
+trialsClustersMembership    = individualFingerprint.trialsSpectralModeMembership;
+
+if(numel(trialsClustersMembership) == 0)
+    error('trialsClustersMembership is empty !');
+end
+
+for iCluster = 1:cfg.nSpectralModesPerROI
+    clusterTrialsIndices        = find(trialsClustersMembership==iCluster);
+    clusterDuration(iCluster)   = length(clusterTrialsIndices);
+    clusterDuration(iCluster)   = clusterDuration(iCluster)/length(trialsClustersMembership)*100;
+end
+
+individualFingerprint.clusterDuration = clusterDuration;
+
+##### SOURCE END #####
+--></body></html>

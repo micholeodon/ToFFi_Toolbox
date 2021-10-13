@@ -1,0 +1,238 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>checkStageDataPresence</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="checkStageDataPresence.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li><li><a href="#4">Outputs</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [list_data, isMissingData] = checkStageDataPresence(stageConfig, goodSubjectsIndices)
+</pre><p>Checks if data for selected stage is present, based on the data from provided configuration variable. When second argument (which is optional) is provided it takes into account data related to subjects listed in goodSubjectIndices.</p><p>NOTE ! Call it with one argument if input data is not divided into separate subject directories, otherwise call it with two arguments.</p><p>Depends on: getFilesMatchingName.m,  makeSubjectAndDataLists.m</p><h2 id="3">Inputs</h2><p><b>stageConfig</b> - struct; contains fields with configuration variables of single stage, i.e. one of the fields from CFG variable. Used fields:</p><p><i>inputDataFolder</i> - cell containing paths to directories with the input data.</p><p><i>dataNamesList</i> - cell containing names of the files which presence will be                   checked.</p><p><b>goodSubjectsIndices</b> - (optional) double; array of good subject indices                         i.e whose data are permitted to be on the output                         list. For stages where stage data are not                         subject-specific user SHOULD NOT call function with                         two arguments, but only with first argument!</p><h2 id="4">Outputs</h2><p><b>list_data</b> - array of struct; each struct is related to one good               subject. Each field contain a file name that was found.</p><p><b>isDataMissing</b> - 0 or 1; 1 indicates that not all of intended data were                   found. Warning! Current version of this function throws                   error when isDataMissing == 1</p><pre class="codeinput"><span class="keyword">if</span>(~isfield(stageConfig, <span class="string">'inputDataFolder'</span>)) error(<span class="string">'No inputDataFolder field in stage CFG !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(stageConfig, <span class="string">'dataNamesList'</span>)) error(<span class="string">'No dataNamesList field in stage CFG !'</span>); <span class="keyword">end</span>
+
+nInputDirs = length(stageConfig.inputDataFolder);
+
+<span class="keyword">if</span>(length(stageConfig.dataNamesList) == 0)
+    warning(<span class="string">'WARNING! No data names are provided in config_.m . Was it intensional?'</span>);
+    warning(<span class="string">'No control over data names will be provided. Proceed with care !'</span>);
+    list_data = [];
+    isMissingData = 0;
+<span class="keyword">else</span>
+    <span class="keyword">if</span>(nargin == 1)
+	<span class="comment">% check stage data presence</span>
+	isMissingData = 0;
+
+	<span class="keyword">for</span> iDataName = 1:length(stageConfig.dataNamesList)
+	    isFound = 0;
+
+	    fieldName = stageConfig.dataNamesList{iDataName};
+	    dataName  = stageConfig.dataNamesList{iDataName};
+
+	    <span class="keyword">for</span> iInputDir = 1:nInputDirs
+		waste_output= evalc(<span class="string">'list_data.(fieldName) = getFilesMatchingName(dataName, stageConfig.inputDataFolder{iInputDir})'</span>);
+
+		<span class="keyword">if</span>(~isempty(list_data.(fieldName)))
+		    isFound = 1;
+		    <span class="keyword">break</span>;
+		<span class="keyword">end</span>
+	    <span class="keyword">end</span>
+	    <span class="keyword">if</span>(isFound == 0)
+		isMissingData = 1;
+	    <span class="keyword">end</span>
+
+	<span class="keyword">end</span>
+
+	disp(<span class="string">'This is group analysis. No subject-level data.'</span>)
+	disp(<span class="string">'Group data files needed are: '</span>)
+	disp(stageConfig.dataNamesList')
+
+    <span class="keyword">elseif</span>(nargin == 2)
+	stageConfig.inputDataFolder
+	<span class="keyword">if</span>(nInputDirs &gt; 1)
+	    error(<span class="string">'ERROR: Loading data from individual subjects data from many stages output is not supported yet !'</span>);
+	<span class="keyword">end</span>
+
+	<span class="comment">% check stage data presence</span>
+	[list_data, ~, isMissingData ] = makeSubjectAndDataLists(<span class="string">'Sub_'</span>, <span class="keyword">...</span>
+	    stageConfig.inputDataFolder{1}, <span class="keyword">...</span>
+	    stageConfig.dataNamesList, <span class="keyword">...</span>
+	    goodSubjectsIndices);
+
+	disp(<span class="string">'For particular subject, here e.g. subject 1, data files needed are: '</span>)
+	disp(list_data(1))
+	disp(<span class="string">'Check if any data are missing ...'</span>)
+    <span class="keyword">else</span>
+	error(<span class="string">'Zero or too many arguments provided !'</span>);
+    <span class="keyword">end</span>
+
+    <span class="keyword">if</span>(isMissingData)
+	error(<span class="string">'Some data are missing !'</span>);
+    <span class="keyword">else</span>
+	disp(<span class="string">'OK - no missing data.'</span>);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [list_data, isMissingData] = checkStageDataPresence(stageConfig, goodSubjectsIndices)
+%%
+% Checks if data for selected stage is present, based on the data from
+% provided configuration variable. When second argument (which is optional)
+% is provided it takes into account data related to subjects listed in
+% goodSubjectIndices. 
+%
+% NOTE ! Call it with one argument if input data is not divided into separate
+% subject directories, otherwise call it with two arguments.
+%
+% Depends on: getFilesMatchingName.m,  makeSubjectAndDataLists.m
+%% Inputs
+% *stageConfig* - struct; contains fields with configuration variables of
+% single stage, i.e. one of the fields from CFG variable. Used fields:
+%
+% _inputDataFolder_ - cell containing paths to directories with the input data.
+%
+% _dataNamesList_ - cell containing names of the files which presence will be
+%                   checked.
+%
+% *goodSubjectsIndices* - (optional) double; array of good subject indices
+%                         i.e whose data are permitted to be on the output
+%                         list. For stages where stage data are not
+%                         subject-specific user SHOULD NOT call function with
+%                         two arguments, but only with first argument!
+%
+%% Outputs
+% *list_data* - array of struct; each struct is related to one good
+%               subject. Each field contain a file name that was found.
+%
+% *isDataMissing* - 0 or 1; 1 indicates that not all of intended data were
+%                   found. Warning! Current version of this function throws
+%                   error when isDataMissing == 1
+%%
+
+if(~isfield(stageConfig, 'inputDataFolder')) error('No inputDataFolder field in stage CFG !'); end
+if(~isfield(stageConfig, 'dataNamesList')) error('No dataNamesList field in stage CFG !'); end
+
+nInputDirs = length(stageConfig.inputDataFolder);
+
+if(length(stageConfig.dataNamesList) == 0)
+    warning('WARNING! No data names are provided in config_.m . Was it intensional?');
+    warning('No control over data names will be provided. Proceed with care !');
+    list_data = [];
+    isMissingData = 0;
+else
+    if(nargin == 1)
+	% check stage data presence
+	isMissingData = 0;
+
+	for iDataName = 1:length(stageConfig.dataNamesList)
+	    isFound = 0;
+
+	    fieldName = stageConfig.dataNamesList{iDataName};
+	    dataName  = stageConfig.dataNamesList{iDataName};
+
+	    for iInputDir = 1:nInputDirs
+		waste_output= evalc('list_data.(fieldName) = getFilesMatchingName(dataName, stageConfig.inputDataFolder{iInputDir})');
+
+		if(~isempty(list_data.(fieldName)))
+		    isFound = 1;
+		    break;
+		end
+	    end
+	    if(isFound == 0)
+		isMissingData = 1;
+	    end
+
+	end
+
+	disp('This is group analysis. No subject-level data.')
+	disp('Group data files needed are: ')
+	disp(stageConfig.dataNamesList')
+
+    elseif(nargin == 2)
+	stageConfig.inputDataFolder
+	if(nInputDirs > 1)
+	    error('ERROR: Loading data from individual subjects data from many stages output is not supported yet !');
+	end
+
+	% check stage data presence
+	[list_data, ~, isMissingData ] = makeSubjectAndDataLists('Sub_', ...
+	    stageConfig.inputDataFolder{1}, ...
+	    stageConfig.dataNamesList, ...
+	    goodSubjectsIndices);
+
+	disp('For particular subject, here e.g. subject 1, data files needed are: ')
+	disp(list_data(1))
+	disp('Check if any data are missing ...')
+    else
+	error('Zero or too many arguments provided !');
+    end
+
+    if(isMissingData)
+	error('Some data are missing !');
+    else
+	disp('OK - no missing data.');
+    end
+end
+
+##### SOURCE END #####
+--></body></html>

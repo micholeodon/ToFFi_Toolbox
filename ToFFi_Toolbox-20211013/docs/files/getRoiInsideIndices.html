@@ -1,0 +1,185 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>getRoiInsideIndices</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="getRoiInsideIndices.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li><li><a href="#4">Outputs</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [inside_idx, tissue_idx] = getRoiInsideIndices(roi, sourceAtlasSingle, sourceModel)
+</pre><p>Gets array of indices of voxels that are labeled by the selected ROI.</p><h2 id="3">Inputs</h2><p><b>roi</b> - double; integer index of single chosen ROI         or         char; name of single chosen ROI (one of the names inside         <b>sourceAtlasSingle.tissuelabel</b> field)</p><p><b>sourceModel</b> - struct; output of prepareSourceModel.m routine</p><p><b>sourceAtlasSingle</b> - struct; single structure from output structure array                       sourceAtlas of prepareAtlas.m routine</p><h2 id="4">Outputs</h2><p><b>inside_idx</b> - double; array of integer indices from 'inside' structure                field of a <b>sourceModel</b> corresponding to selected ROI.</p><p><b>tissue_idx</b> - double; array of integer indices from 'tissue' structure                field of a <b>sourceModel</b> corresponding to selected ROI.</p><pre class="codeinput"><span class="keyword">if</span>(ischar(roi))
+    ROIbyName = 1;
+    ROIbyNr   = 0;
+<span class="keyword">elseif</span>(isa(roi,<span class="string">'double'</span>))
+    ROIbyName = 0;
+    ROIbyNr   = 1;
+<span class="keyword">else</span>
+    ROIbyName = 0;
+    ROIbyNr   = 0;
+    error(<span class="string">'Variable roi is of unrecognized class ...'</span>)
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> ROIbyName
+    roiNr = find(ismember(sourceAtlasSingle.tissuelabel, roi));
+    roiName = roi;
+<span class="keyword">elseif</span> ROIbyNr
+    roiNr = roi;
+    roiName = sourceAtlasSingle.tissuelabel{roiNr};
+<span class="keyword">else</span>
+    error(<span class="string">'Code error!'</span>)
+<span class="keyword">end</span>
+
+
+<span class="keyword">if</span> strcmp(roiName, <span class="string">'nonroi'</span>)
+    check_dipole_matrix = nan(1, length(sourceModel.inside));
+    <span class="keyword">for</span> iROI = 1:length(sourceAtlasSingle.tissuelabel)
+        <span class="comment">% check-out all ROI voxel to left non-ROI voxels unchecked</span>
+        selROIvoxels  = double(sourceAtlasSingle.tissue == iROI);
+        tissue_idx    = (find(selROIvoxels == 1)');
+        idx = find(ismember(sourceModel.inside, tissue_idx));
+        <span class="keyword">if</span>(isnan(check_dipole_matrix(idx))) <span class="comment">% checks out all roi voxels so only non roi voxel will be left nan</span>
+            check_dipole_matrix(idx) = 1;
+        <span class="keyword">else</span>
+            check_dipole_matrix(idx) = check_dipole_matrix(idx) + 1;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    inside_idx = find(isnan(check_dipole_matrix)); <span class="comment">% indices of voxels that not belong to any roi but are still inside brain</span>
+
+<span class="keyword">else</span>
+    selROIvoxels  = double(sourceAtlasSingle.tissue == roiNr);
+    tissue_idx    = (find(selROIvoxels == 1)');
+    inside_idx = find(ismember(sourceModel.inside, tissue_idx));
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [inside_idx, tissue_idx] = getRoiInsideIndices(roi, sourceAtlasSingle, sourceModel)
+%%
+% Gets array of indices of voxels that are labeled by the selected ROI.
+%
+%% Inputs
+% *roi* - double; integer index of single chosen ROI
+%         or
+%         char; name of single chosen ROI (one of the names inside
+%         *sourceAtlasSingle.tissuelabel* field)
+%
+% *sourceModel* - struct; output of prepareSourceModel.m routine
+%
+% *sourceAtlasSingle* - struct; single structure from output structure array
+%                       sourceAtlas of prepareAtlas.m routine  
+%% Outputs
+% *inside_idx* - double; array of integer indices from 'inside' structure
+%                field of a *sourceModel* corresponding to selected ROI.
+%
+% *tissue_idx* - double; array of integer indices from 'tissue' structure
+%                field of a *sourceModel* corresponding to selected ROI.
+%%
+
+if(ischar(roi))
+    ROIbyName = 1;
+    ROIbyNr   = 0;
+elseif(isa(roi,'double'))
+    ROIbyName = 0;
+    ROIbyNr   = 1;
+else
+    ROIbyName = 0;
+    ROIbyNr   = 0;
+    error('Variable roi is of unrecognized class ...')
+end
+
+if ROIbyName
+    roiNr = find(ismember(sourceAtlasSingle.tissuelabel, roi));
+    roiName = roi;
+elseif ROIbyNr
+    roiNr = roi;
+    roiName = sourceAtlasSingle.tissuelabel{roiNr};
+else
+    error('Code error!')
+end
+
+
+if strcmp(roiName, 'nonroi')
+    check_dipole_matrix = nan(1, length(sourceModel.inside));
+    for iROI = 1:length(sourceAtlasSingle.tissuelabel)
+        % check-out all ROI voxel to left non-ROI voxels unchecked
+        selROIvoxels  = double(sourceAtlasSingle.tissue == iROI);
+        tissue_idx    = (find(selROIvoxels == 1)');
+        idx = find(ismember(sourceModel.inside, tissue_idx));
+        if(isnan(check_dipole_matrix(idx))) % checks out all roi voxels so only non roi voxel will be left nan
+            check_dipole_matrix(idx) = 1;
+        else
+            check_dipole_matrix(idx) = check_dipole_matrix(idx) + 1;
+        end
+    end
+    
+    inside_idx = find(isnan(check_dipole_matrix)); % indices of voxels that not belong to any roi but are still inside brain
+    
+else
+    selROIvoxels  = double(sourceAtlasSingle.tissue == roiNr);
+    tissue_idx    = (find(selROIvoxels == 1)');
+    inside_idx = find(ismember(sourceModel.inside, tissue_idx));
+end
+
+##### SOURCE END #####
+--></body></html>

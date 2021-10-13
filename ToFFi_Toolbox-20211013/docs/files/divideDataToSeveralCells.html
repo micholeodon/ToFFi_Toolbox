@@ -1,0 +1,178 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>divideDataToSeveralCells</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="divideDataToSeveralCells.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</a></li><li><a href="#3">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</a></li><li><a href="#4">division</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [dataMultiCell, isAnyColumnLost] = divideDataToSeveralCells(cfg, dataSingleCell)
+</pre><h2 id="2">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</h2><pre class="codeinput"><span class="keyword">if</span>(~isstruct(cfg)) error(<span class="string">'cfg argument is not a struct !'</span>); <span class="keyword">end</span>
+
+divideByNumCells = isfield(cfg, <span class="string">'numCells'</span>);
+divideByNumColumnsPerCell = isfield(cfg, <span class="string">'numColumnsPerCell'</span>);
+
+<span class="keyword">if</span>(divideByNumCells &amp;&amp; divideByNumColumnsPerCell)
+    error(<span class="string">'cfg contains both numCells and numColumnsPerCell. Choose only one of those !'</span>);
+<span class="keyword">end</span>
+
+<span class="keyword">if</span>(~iscell(dataSingleCell)) error(<span class="string">'Data is not a cell array !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(numel(dataSingleCell) &gt; 1) error(<span class="string">'More than one cell in the input data !'</span>); <span class="keyword">end</span>
+</pre><h2 id="3">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</h2><pre class="codeinput">totalLength         = size(dataSingleCell{:}, 2);
+isAnyColumnLost    = 1;
+
+<span class="keyword">if</span> divideByNumCells
+    numCells = cfg.numCells;
+
+    <span class="keyword">if</span>(~isInteger(numCells)) error(<span class="string">'Wrong type of cfg.numCells !'</span>); <span class="keyword">end</span>
+    <span class="keyword">if</span>(numCells &lt; 1) error(<span class="string">'Cannot divide to less than 1 cell !'</span>); <span class="keyword">end</span>
+    <span class="keyword">if</span>(numCells &gt; totalLength) error(<span class="string">'Cannot divide to more cells than number of columns in input cell !'</span>); <span class="keyword">end</span>
+
+    numColumnsPerCell  = floor(totalLength/numCells);
+<span class="comment">%     isAnyColumnLost    = ~(mod(totalLength, numColumnsPerCell) == 0);</span>
+
+<span class="keyword">elseif</span> divideByNumColumnsPerCell
+    <span class="keyword">if</span>(~isInteger(cfg.numColumnsPerCell)) error(<span class="string">'Wrong type of cfg.numColumnsPerCell !'</span>); <span class="keyword">end</span>
+    <span class="keyword">if</span>(cfg.numColumnsPerCell &gt; totalLength) error(<span class="string">'Cannot divide to more number of columns than number of them already available !'</span>); <span class="keyword">end</span>
+
+    numColumnsPerCell  = cfg.numColumnsPerCell;
+    numCells            = floor(totalLength/numColumnsPerCell);
+<span class="comment">%     isAnyColumnLost    = ~(mod(totalLength, numColumnsPerCell) == 0);</span>
+
+<span class="keyword">else</span>
+    error(<span class="string">'Fatal error: Unrecognized state of the function ! Probably wrong cfg argument.'</span>);
+<span class="keyword">end</span>
+</pre><h2 id="4">division</h2><pre class="codeinput">dataMultiCell   = cell(1, numCells);
+trialLengths    = numColumnsPerCell*ones(1, numCells);
+<span class="keyword">for</span> iCell = 1:numCells
+    currentStartSampleIndex     = sum(trialLengths( 1 : (iCell-1)   )) + 1;
+    currentEndSampleIndex       = sum(trialLengths( 1 : iCell       ));
+
+    dataMultiCell{iCell} = dataSingleCell{1}(:, currentStartSampleIndex : currentEndSampleIndex);
+<span class="keyword">end</span>
+
+
+isAnyColumnLost = ~isequal([dataMultiCell{:}], [dataSingleCell{:}]);
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [dataMultiCell, isAnyColumnLost] = divideDataToSeveralCells(cfg, dataSingleCell)
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if(~isstruct(cfg)) error('cfg argument is not a struct !'); end
+
+divideByNumCells = isfield(cfg, 'numCells');
+divideByNumColumnsPerCell = isfield(cfg, 'numColumnsPerCell');
+
+if(divideByNumCells && divideByNumColumnsPerCell)
+    error('cfg contains both numCells and numColumnsPerCell. Choose only one of those !');
+end
+
+if(~iscell(dataSingleCell)) error('Data is not a cell array !'); end
+if(numel(dataSingleCell) > 1) error('More than one cell in the input data !'); end
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+totalLength         = size(dataSingleCell{:}, 2);
+isAnyColumnLost    = 1;
+
+if divideByNumCells
+    numCells = cfg.numCells;
+
+    if(~isInteger(numCells)) error('Wrong type of cfg.numCells !'); end
+    if(numCells < 1) error('Cannot divide to less than 1 cell !'); end
+    if(numCells > totalLength) error('Cannot divide to more cells than number of columns in input cell !'); end
+
+    numColumnsPerCell  = floor(totalLength/numCells);
+%     isAnyColumnLost    = ~(mod(totalLength, numColumnsPerCell) == 0);
+
+elseif divideByNumColumnsPerCell
+    if(~isInteger(cfg.numColumnsPerCell)) error('Wrong type of cfg.numColumnsPerCell !'); end
+    if(cfg.numColumnsPerCell > totalLength) error('Cannot divide to more number of columns than number of them already available !'); end
+
+    numColumnsPerCell  = cfg.numColumnsPerCell;
+    numCells            = floor(totalLength/numColumnsPerCell);
+%     isAnyColumnLost    = ~(mod(totalLength, numColumnsPerCell) == 0);
+
+else
+    error('Fatal error: Unrecognized state of the function ! Probably wrong cfg argument.');
+end
+
+
+%% division
+dataMultiCell   = cell(1, numCells);
+trialLengths    = numColumnsPerCell*ones(1, numCells);
+for iCell = 1:numCells
+    currentStartSampleIndex     = sum(trialLengths( 1 : (iCell-1)   )) + 1;
+    currentEndSampleIndex       = sum(trialLengths( 1 : iCell       ));
+
+    dataMultiCell{iCell} = dataSingleCell{1}(:, currentStartSampleIndex : currentEndSampleIndex);
+end
+
+
+isAnyColumnLost = ~isequal([dataMultiCell{:}], [dataSingleCell{:}]);
+
+##### SOURCE END #####
+--></body></html>

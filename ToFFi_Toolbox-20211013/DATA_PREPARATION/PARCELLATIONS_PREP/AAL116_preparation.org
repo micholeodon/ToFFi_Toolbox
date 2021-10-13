@@ -1,0 +1,25 @@
+This file describes how to use Automated Anatomical Labeling parcellation to be used in Spectral Fingerprinting. We use the version that is implemented inside the FieldTrip toolbox.
+
+* REFERENCES 
+To learn about how this parcellation was designed and implemented read:
+
+1. N. Tzourio-Mazoyer, B. Landeau, D. Papathanassiou, F. Crivello, O. Etard, N. Delcroix, B. Mazoyer, and M. Joliot. Automated Anatomical Labeling of Activations in SPM Using a Macroscopic Anatomical Parcellation of the MNI MRI Single-Subject Brain. NeuroImage 2002. 15:273-289
+2. https://www.fieldtriptoolbox.org/template/atlas/#the-aal-atlas
+
+
+* INSTRUCTIONS
+
+** If the user configures the toolbox using .sh (let's say CFG_myexperiment1.sh) file:
+ 1. Set `G_atlasType='AAL'`.
+ 2. Set `G_atlasPath=$G_fieldtripPath'template/atlas/aal/ROI_MNI_V4.nii'`
+ 3. Run the CFG_myexperiment1.sh file after its edition is wholly done (i.e., all variables are configured to have some value).
+ 4. AAL atlas will be prepared from the `fieldtrip/template/atlas/aal/ROI_MNI_V4.nii` file.
+ 5. Atlas variable will be stored in CFG.Global.sourceAtlasAndSourceModel.sourceAtlas variable, in all CFG.mat files that were output.
+
+
+** If the user configures the toolbox via CONFIGURE.m file:
+ 1. During configuration set CFG.Global.atlasType = 'AAL'
+ 2. Set `CFG.Global.atlasPath = [CFG.Global.fieldtripPath, '/template/atlas/aal/ROI_MNI_V4.nii']`
+ 3. Run the CONFIGURE.m file after its edition is wholly done (i.e., all variables are configured to have some value).
+ 4. AAL atlas will be prepared from the `fieldtrip/template/atlas/aal/ROI_MNI_V4.nii` file.
+ 5. Atlas variable will be stored in CFG.Global.sourceAtlasAndSourceModel.sourceAtlas variable, in all CFG.mat files that were generated.

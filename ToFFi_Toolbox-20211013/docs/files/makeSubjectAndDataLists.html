@@ -1,0 +1,273 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>makeSubjectAndDataLists</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="makeSubjectAndDataLists.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li><li><a href="#4">Outputs</a></li><li><a href="#5">Example</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [list_data, list_subjects, isDataMissing] = makeSubjectAndDataLists(partOfSubjDirName, src_dir, data_names, goodSubjectsIndices)
+</pre><p>Search inside selected directory and outputs a list of data files related to selected subjects. Outputs also the list of good subjects that were found inside selected directory. Depends on: getFilesMatchingName.m;</p><h2 id="3">Inputs</h2><p><b>partOfSubjDirName</b> - char; string that will be search for when listing data and subjects. It will be concatenated with numbers in goodSubjectsIndices to search for individual files, i.e. if partOfSubjDirName='Sub_' and goodSubjectsIndices=[4, 2, 3] then files with 'Sub_4', 'Sub_2', 'Sub_3' will be searched for.</p><p><b>src_dir</b> - char; path to the selected directory to look inside.</p><p><b>data_names</b> - cell; chars with names of files to look for.</p><p><b>goodSubjectsIndices</b> - double; array of good subject indices i.e that are                         are permitted to be on the output lists.</p><h2 id="4">Outputs</h2><p><b>list_data</b> - array of struct; each struct is related to one good               subject. Each field contain a file name that was found.</p><p><b>list_subjects</b> - cell; contains names of the found good subjects</p><p><b>isDataMissing</b> - 0 or 1; 1 indicates that not all of intended  data                   and / or subjects were found. Warning! Current version of                   this function throws error when isDataMissing == 1</p><h2 id="5">Example</h2><p>[ld, ls, f] = makeSubjectAndDataLists('Sub_', '/home/user/myDataDir/',               {'sig', 'beh'}, [4 3]);</p><p>will produce output:</p><p>ld =</p><pre class="language-matlab">1&times;2 struct <span class="string">array</span> <span class="string">with</span> <span class="string">fields:</span>
+</pre><pre>   sig
+   beh</pre><p>&gt;&gt; ld(1)</p><p>ans =</p><pre class="language-matlab">struct <span class="string">with</span> <span class="string">fields:</span>
+</pre><pre>   sig: {'sig_4'}
+   beh: {'beh_4'}</pre><p>&gt;&gt; ld(2)</p><p>ans =</p><pre class="language-matlab">struct <span class="string">with</span> <span class="string">fields:</span>
+</pre><pre>   sig: {'sig_3'}
+   beh: {'beh_3'}</pre><p>&gt;&gt; ls</p><p>ls =</p><pre class="language-matlab">1&times;2 cell <span class="string">array</span>
+</pre><pre>  'Sub_3'    'Sub_4'</pre><p>&gt;&gt; f</p><p>f =     0</p><p>check</p><pre class="codeinput"><span class="keyword">if</span>(~ischar(partOfSubjDirName))
+   error(<span class="string">'Wrong subject name type or empty !'</span>)
+<span class="keyword">else</span>
+   <span class="keyword">if</span>(strcmp(partOfSubjDirName, <span class="string">''</span>)) error(<span class="string">'Subject name is empty !'</span>); <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">if</span>(ischar(src_dir))
+    <span class="comment">% ok</span>
+<span class="keyword">else</span>
+    error(<span class="string">'Wrong src_dir type !'</span>)
+<span class="keyword">end</span>
+
+<span class="keyword">if</span>(ischar(data_names)) tmp=data_names; clear <span class="string">data_names</span>; data_names{1} = tmp; <span class="keyword">end</span>
+
+<span class="keyword">if</span>(~iscellstr(data_names)) error(<span class="string">'Wrong data_names type !'</span>) ; <span class="keyword">end</span>
+
+<span class="keyword">if</span>(iscellstr(data_names) &amp;&amp; isempty(data_names)) error(<span class="string">'data_names cell is empty !'</span>); <span class="keyword">end</span>
+
+<span class="comment">% fix path just in case</span>
+src_dir = fixPath(src_dir);
+<span class="keyword">if</span>(~exist(src_dir, <span class="string">'dir'</span>)) error(<span class="string">'Directory not exist !'</span>); <span class="keyword">end</span>
+
+<span class="keyword">if</span>(any(cellfun(@isempty, data_names))) error(<span class="string">'Some of the data_names are empty !'</span>); <span class="keyword">end</span>
+
+<span class="keyword">if</span>(~exist(<span class="string">'goodSubjectsIndices'</span>,<span class="string">'var'</span>) || isempty(goodSubjectsIndices))
+    noGoodSubArgument = 1;
+<span class="keyword">end</span>
+</pre><pre class="codeinput"><span class="comment">% make lists</span>
+noGoodSubArgument=0;
+
+<span class="comment">% list of subjects</span>
+list_subjects = getFilesMatchingName(partOfSubjDirName, src_dir);
+<span class="keyword">if</span>(isempty(list_subjects)) error([<span class="string">'No subject directories in '</span>, src_dir, <span class="string">'  directory !'</span>]); <span class="keyword">end</span>
+
+<span class="keyword">if</span>(noGoodSubArgument)
+    goodSubjectsIndices = list_subjects;
+<span class="keyword">end</span>
+
+listGoodSubjects = removeBadSubjectsFromList(list_subjects, goodSubjectsIndices);
+
+<span class="comment">% grab all data files in a well organized structure</span>
+<span class="comment">% list files for all data_names from all subjects</span>
+isSomeFieldsEmpty = 0;
+<span class="keyword">for</span> ii = 1:length(listGoodSubjects)
+    s_idx = listGoodSubjects{ii};
+
+    <span class="comment">% check every field</span>
+    <span class="keyword">for</span> fn = 1:length(data_names)
+	fieldname = data_names{fn};
+	list_data(ii).(fieldname) = getFilesMatchingName(fieldname, [src_dir, s_idx, <span class="string">'/'</span>]);
+	isSomeFieldsEmpty = isSomeFieldsEmpty || isempty(list_data(ii).(fieldname)); <span class="comment">% OR: once switched to 1, will stay 1</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+clear <span class="string">fieldname</span> <span class="string">fn</span> <span class="string">ii</span> <span class="string">s_idx</span>
+
+isDataMissing = 0;
+<span class="keyword">if</span>(isSomeFieldsEmpty) warning(<span class="string">'Some data is missing !'</span>); isDataMissing = isSomeFieldsEmpty;  <span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [list_data, list_subjects, isDataMissing] = makeSubjectAndDataLists(partOfSubjDirName, src_dir, data_names, goodSubjectsIndices)
+%%
+% Search inside selected directory and outputs a list of data files related
+% to selected subjects. Outputs also the list of good subjects that were
+% found inside selected directory.
+% Depends on: getFilesMatchingName.m;
+%% Inputs
+% *partOfSubjDirName* - char; string that will be search for when listing
+% data and subjects. It will be concatenated with numbers in
+% goodSubjectsIndices to search for individual files, i.e. if
+% partOfSubjDirName='Sub_' and goodSubjectsIndices=[4, 2, 3] then files with
+% 'Sub_4', 'Sub_2', 'Sub_3' will be searched for.
+%
+% *src_dir* - char; path to the selected directory to look inside.
+%
+% *data_names* - cell; chars with names of files to look for.
+%
+% *goodSubjectsIndices* - double; array of good subject indices i.e that are
+%                         are permitted to be on the output lists.
+%% Outputs
+% *list_data* - array of struct; each struct is related to one good
+%               subject. Each field contain a file name that was found.
+%
+% *list_subjects* - cell; contains names of the found good subjects
+%
+% *isDataMissing* - 0 or 1; 1 indicates that not all of intended  data
+%                   and / or subjects were found. Warning! Current version of
+%                   this function throws error when isDataMissing == 1
+%% Example
+% [ld, ls, f] = makeSubjectAndDataLists('Sub_', '/home/user/myDataDir/',
+%               {'sig', 'beh'}, [4 3]);
+%
+% will produce output:
+%
+% ld =
+%
+%   1×2 struct array with fields:
+%
+%     sig
+%     beh
+%
+% >> ld(1)
+%
+% ans =
+%
+%   struct with fields:
+%
+%     sig: {'sig_4'}
+%     beh: {'beh_4'}
+%
+% >> ld(2)
+%
+% ans =
+%
+%   struct with fields:
+%
+%     sig: {'sig_3'}
+%     beh: {'beh_3'}
+%
+% >> ls
+%
+% ls =
+%
+%   1×2 cell array
+%
+%    'Sub_3'    'Sub_4'
+%
+% >> f
+%
+% f =
+%     0
+%
+%%
+% check
+if(~ischar(partOfSubjDirName))
+   error('Wrong subject name type or empty !')
+else
+   if(strcmp(partOfSubjDirName, '')) error('Subject name is empty !'); end
+end
+
+if(ischar(src_dir))
+    % ok
+else
+    error('Wrong src_dir type !')
+end
+
+if(ischar(data_names)) tmp=data_names; clear data_names; data_names{1} = tmp; end
+
+if(~iscellstr(data_names)) error('Wrong data_names type !') ; end
+
+if(iscellstr(data_names) && isempty(data_names)) error('data_names cell is empty !'); end
+
+% fix path just in case
+src_dir = fixPath(src_dir);
+if(~exist(src_dir, 'dir')) error('Directory not exist !'); end
+
+if(any(cellfun(@isempty, data_names))) error('Some of the data_names are empty !'); end
+
+if(~exist('goodSubjectsIndices','var') || isempty(goodSubjectsIndices))
+    noGoodSubArgument = 1;
+end
+
+%%
+
+% make lists
+noGoodSubArgument=0;
+
+% list of subjects
+list_subjects = getFilesMatchingName(partOfSubjDirName, src_dir);
+if(isempty(list_subjects)) error(['No subject directories in ', src_dir, '  directory !']); end
+
+if(noGoodSubArgument)
+    goodSubjectsIndices = list_subjects;
+end
+
+listGoodSubjects = removeBadSubjectsFromList(list_subjects, goodSubjectsIndices);
+
+% grab all data files in a well organized structure
+% list files for all data_names from all subjects
+isSomeFieldsEmpty = 0;
+for ii = 1:length(listGoodSubjects)
+    s_idx = listGoodSubjects{ii};
+
+    % check every field
+    for fn = 1:length(data_names)
+	fieldname = data_names{fn};
+	list_data(ii).(fieldname) = getFilesMatchingName(fieldname, [src_dir, s_idx, '/']);
+	isSomeFieldsEmpty = isSomeFieldsEmpty || isempty(list_data(ii).(fieldname)); % OR: once switched to 1, will stay 1
+    end
+end
+clear fieldname fn ii s_idx
+
+isDataMissing = 0;
+if(isSomeFieldsEmpty) warning('Some data is missing !'); isDataMissing = isSomeFieldsEmpty;  end
+
+##### SOURCE END #####
+--></body></html>

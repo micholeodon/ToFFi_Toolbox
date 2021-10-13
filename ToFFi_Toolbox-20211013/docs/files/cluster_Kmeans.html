@@ -1,0 +1,228 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>cluster_Kmeans</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="cluster_Kmeans.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li><li><a href="#4">Outputs</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> inputStructure = cluster_Kmeans(cfg, inputStructure)
+</pre><p>Performs K-means clustering on the multidimensional data. Uses standard MATLAB kmeans routine with additional improvements:</p><p>- initial sorting (result is invariant to the order of rows of the data matrix)</p><p>- post-relabeling (for given solution labels are always the same,   see reNumerateClusters.m for further explanation).</p><h2 id="3">Inputs</h2><p><b>cfg</b> - struct with fields:</p><p><i>distanceMetric</i> - char; metric that will be used to compute                    distance between data points. Possible choices: <a href="https://www.mathworks.com/help/stats/kmeans.html?searchHighlight=kmeans&amp;s_tid=srchtitle#buefs04-Distance">https://www.mathworks.com/help/stats/kmeans.html?searchHighlight=kmeans&amp;s_tid=srchtitle#buefs04-Distance</a></p><p><i>nReplicates</i> - double; integer number of times to repeat clustering using                 new initial cluster centroid positions. Solution with the                 lowest within-cluster sums of point-to-centroid distances                 will be chosen as the final one.</p><p><i>nClusters</i> - double; integer number of clusters to be found in the data.</p><p><i>dataFieldName</i> - char; name of the field in the <b>inputStructure</b>                   containing data matrix to be clustered</p><p><i>prefixToFields</i> - (optional) char; prefix that will be added at the                    beginning of each new field created in the                    <b>inputStructure</b>, e.g. if <i>prefixToFields</i> = 'lvl1_',                    following fields will be added to <b>inputStructure</b>:                    <i>lvl1_kMeans_pointsClusterIndices</i>,                    <i>lvl1_kMeans_centroids</i>,                    <i>lvl1_kMeans_withinClusterDistance</i>.</p><p><b>inputStructure</b> - struct with single obligatory field containing data to                    be clustered. This data field should have same name as                    name stored in <b>cfg.dataFieldName</b>. Data should be a                    double 2D-array of size N x D, where N is the number of                    observations to be clustered and D is the number of                    dimensions / variables.</p><h2 id="4">Outputs</h2><p><b>*inputStructure</b>* - same struct as in input but containing additional fields:</p><p><i>kMeans_pointsClusterIndices</i> - double; 1D-array containing cluster index                                 for each of the clustered points in the                                 input data matrix. Contain values from 1 to                                 cfg.nClusters. <i>kMeans_centroids</i> - double; 2D-array of size cfg.nClusters x D, where D is                      the number of dimensions / variables . Each row                      contains single cluster center (centroid).</p><p><i>kMeans_withinClusterDistance</i> - double; 1D-array of within-cluster sums of                                  point-to-centroid distances.</p><pre class="codeinput">display(<span class="string">'K-means clustering ...'</span>)
+
+<span class="comment">% checks</span>
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'distanceMetric'</span>)) error(<span class="string">'Missing field distanceMetric in cfg input argument !'</span>); <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'nReplicates'</span>))    error(<span class="string">'Missing field nReplicates in cfg input argument !'</span>);  <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'nClusters'</span>))    error(<span class="string">'Missing field nClusters in cfg input argument !'</span>);  <span class="keyword">end</span>
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'dataFieldName'</span>))    error(<span class="string">'Missing field dataFieldName in cfg input argument !'</span>);  <span class="keyword">end</span>
+
+
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'prefixToFields'</span>))
+    prefix = <span class="string">''</span>;
+<span class="keyword">elseif</span>(isempty(cfg.prefixToFields))
+    prefix = <span class="string">''</span>;
+<span class="keyword">else</span>
+    prefix = cfg.prefixToFields;
+<span class="keyword">end</span>
+
+<span class="comment">% init new fields</span>
+inputStructure.([prefix, <span class="string">'kMeans_pointsClusterIndices'</span>])     = [];
+inputStructure.([prefix, <span class="string">'kMeans_centroids'</span>])                = [];
+inputStructure.([prefix, <span class="string">'kMeans_withinClusterDistance'</span>])    = [];
+
+displayOption   = statset(<span class="string">'Display'</span>,<span class="string">'final'</span>);
+dataToCluster = inputStructure.(cfg.dataFieldName);
+
+<span class="keyword">if</span>(size(dataToCluster,1) &lt;= cfg.nClusters)
+    error(<span class="string">'Error: There should be more points to cluster than demanded number of clusters !'</span>);
+<span class="keyword">end</span>
+
+<span class="comment">% sort</span>
+[dataToCluster_sorted, sortedOrder] = sortrows(dataToCluster);
+waste_txt_output = evalc([<span class="string">'[clusterID_sorted, centroids, withinClusterDistance] = kmeans( dataToCluster_sorted, cfg.nClusters,'</span> <span class="keyword">...</span>
+    <span class="string">' ''Options'', displayOption,'</span> <span class="keyword">...</span>
+    <span class="string">' ''Distance'', cfg.distanceMetric,'</span> <span class="keyword">...</span>
+    <span class="string">' ''Replicates'', cfg.nReplicates);'</span>]);
+clear <span class="string">waste_txt_output</span>
+
+<span class="comment">% un-sort results so they fit to the input data</span>
+clear <span class="string">clusterID</span>
+clusterID(sortedOrder, :) = clusterID_sorted;
+
+<span class="comment">% reorder rows within kmeans output -&gt; rebustness of cluster indices to random kmeans start</span>
+[clusterID, oldOrder]       = reNumerateClusters(clusterID);
+centroids                   = centroids(oldOrder,:);
+withinClusterDistance       = withinClusterDistance(oldOrder,:);
+
+inputStructure.([prefix, <span class="string">'kMeans_pointsClusterIndices'</span>])     = clusterID;
+inputStructure.([prefix, <span class="string">'kMeans_centroids'</span>])                = centroids;
+inputStructure.([prefix, <span class="string">'kMeans_withinClusterDistance'</span>])    = withinClusterDistance;
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function inputStructure = cluster_Kmeans(cfg, inputStructure)
+%%
+% Performs K-means clustering on the multidimensional data. Uses standard
+% MATLAB kmeans routine with additional improvements:
+%
+% - initial sorting (result is invariant to the order of rows of the data matrix)
+%
+% - post-relabeling (for given solution labels are always the same,
+%   see reNumerateClusters.m for further explanation).
+%% Inputs
+% *cfg* - struct with fields:
+%
+% _distanceMetric_ - char; metric that will be used to compute
+%                    distance between data points. Possible choices:
+% https://www.mathworks.com/help/stats/kmeans.html?searchHighlight=kmeans&s_tid=srchtitle#buefs04-Distance
+%
+% _nReplicates_ - double; integer number of times to repeat clustering using
+%                 new initial cluster centroid positions. Solution with the
+%                 lowest within-cluster sums of point-to-centroid distances
+%                 will be chosen as the final one.
+%
+% _nClusters_ - double; integer number of clusters to be found in the data.
+%
+% _dataFieldName_ - char; name of the field in the *inputStructure*
+%                   containing data matrix to be clustered
+%
+% _prefixToFields_ - (optional) char; prefix that will be added at the
+%                    beginning of each new field created in the
+%                    *inputStructure*, e.g. if _prefixToFields_ = 'lvl1_',
+%                    following fields will be added to *inputStructure*:
+%                    _lvl1_kMeans_pointsClusterIndices_,
+%                    _lvl1_kMeans_centroids_,
+%                    _lvl1_kMeans_withinClusterDistance_.
+%
+% *inputStructure* - struct with single obligatory field containing data to
+%                    be clustered. This data field should have same name as
+%                    name stored in *cfg.dataFieldName*. Data should be a
+%                    double 2D-array of size N x D, where N is the number of
+%                    observations to be clustered and D is the number of
+%                    dimensions / variables.
+%% Outputs
+% **inputStructure** - same struct as in input but containing additional fields:
+%
+% _kMeans_pointsClusterIndices_ - double; 1D-array containing cluster index
+%                                 for each of the clustered points in the
+%                                 input data matrix. Contain values from 1 to
+%                                 cfg.nClusters.
+% _kMeans_centroids_ - double; 2D-array of size cfg.nClusters x D, where D is
+%                      the number of dimensions / variables . Each row
+%                      contains single cluster center (centroid).
+%
+% _kMeans_withinClusterDistance_ - double; 1D-array of within-cluster sums of
+%                                  point-to-centroid distances.
+%%
+
+display('K-means clustering ...')
+
+% checks
+if(~isfield(cfg, 'distanceMetric')) error('Missing field distanceMetric in cfg input argument !'); end
+if(~isfield(cfg, 'nReplicates'))    error('Missing field nReplicates in cfg input argument !');  end
+if(~isfield(cfg, 'nClusters'))    error('Missing field nClusters in cfg input argument !');  end
+if(~isfield(cfg, 'dataFieldName'))    error('Missing field dataFieldName in cfg input argument !');  end
+
+
+if(~isfield(cfg, 'prefixToFields'))
+    prefix = '';
+elseif(isempty(cfg.prefixToFields))
+    prefix = '';
+else
+    prefix = cfg.prefixToFields;
+end
+
+% init new fields
+inputStructure.([prefix, 'kMeans_pointsClusterIndices'])     = [];
+inputStructure.([prefix, 'kMeans_centroids'])                = [];
+inputStructure.([prefix, 'kMeans_withinClusterDistance'])    = [];
+
+displayOption   = statset('Display','final');
+dataToCluster = inputStructure.(cfg.dataFieldName);
+
+if(size(dataToCluster,1) <= cfg.nClusters)
+    error('Error: There should be more points to cluster than demanded number of clusters !');
+end
+
+% sort
+[dataToCluster_sorted, sortedOrder] = sortrows(dataToCluster); 
+waste_txt_output = evalc(['[clusterID_sorted, centroids, withinClusterDistance] = kmeans( dataToCluster_sorted, cfg.nClusters,' ...
+    ' ''Options'', displayOption,' ...
+    ' ''Distance'', cfg.distanceMetric,' ...
+    ' ''Replicates'', cfg.nReplicates);']);
+clear waste_txt_output
+
+% un-sort results so they fit to the input data
+clear clusterID
+clusterID(sortedOrder, :) = clusterID_sorted;
+
+% reorder rows within kmeans output -> rebustness of cluster indices to random kmeans start
+[clusterID, oldOrder]       = reNumerateClusters(clusterID);
+centroids                   = centroids(oldOrder,:);
+withinClusterDistance       = withinClusterDistance(oldOrder,:);
+
+inputStructure.([prefix, 'kMeans_pointsClusterIndices'])     = clusterID;
+inputStructure.([prefix, 'kMeans_centroids'])                = centroids;
+inputStructure.([prefix, 'kMeans_withinClusterDistance'])    = withinClusterDistance;
+
+##### SOURCE END #####
+--></body></html>

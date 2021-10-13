@@ -1,0 +1,234 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>checkIndAtlasesConsistency</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="checkIndAtlasesConsistency.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li><li><a href="#4">Outputs</a></li><li><a href="#7">prepare 2D matrix of label-numbers nAtlas x nLabels</a></li><li><a href="#8">prepare 2D matrix of unique sorted tissue</a></li><li><a href="#9">note down iSub field values for checking below</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> [atlases, roiValidForAllSubjects]  = checkIndAtlasesConsistency(atlases)
+</pre><p>Function that checks if a structure array containing individual brain atlases has consistent fields.</p><h2 id="3">Inputs</h2><p><b>atlases</b> - array of struct. Each struct represents single subject atlas             and has the following fields:</p><p><i>iSub</i> - double; integer index of subject</p><p><i>path</i> - char; path to the source file from which atlas was prepared</p><p><i>dim</i> - double 1-D array of positive integers; the size of the 3D volume in         voxels</p><p><i>transform</i> - double 2-D array containing affine transformation matrix for               mapping the voxel coordinates to head coordinate system</p><p><i>unit</i> - string; the units in which the coordinate system is expressed</p><p><i>tissue</i> - double 3-D array with integer values from 1 to N (the value 0            means unknown). Values are related to the ROI labels stored in            <i>tissuelabel</i> fields. Size of each dimension is stored in the            <i>dim</i> field. It stores ROI label for each brain voxel.</p><p><i>tissuelabel</i> - cell of strings containing name of each ROI.</p><h2 id="4">Outputs</h2><p><b>atlases</b> - same as input.</p><p><b>roiValidForAllSubjects</b> - double 1-D array containing list of ROIs common                            for all subjects, i.e. for each subject each of                            these ROI has at least one entry in the <i>tissue</i>                            field inside <b>*atlas</b>* structure.</p><pre class="codeinput">nAtlas = numel(atlases);
+iSubTable = zeros(1,nAtlas);
+<span class="keyword">for</span> iAtlas = 1:nAtlas
+</pre><pre class="codeinput">    A = atlases(iAtlas);
+
+    <span class="comment">% 1. Check for empty fields</span>
+    <span class="keyword">for</span> f = fieldnames(A)'
+       <span class="keyword">if</span>( isempty(A.(f{1})) )
+           error([<span class="string">'Error! Atlas no '</span>, num2str(iAtlas), <span class="string">' has empty fields!'</span>])
+       <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% 2. Check for duplicate labels</span>
+    <span class="keyword">if</span>(numel(unique(A.tissuelabel)) &lt; numel(A.tissuelabel))
+        error([<span class="string">'Error! Atlas no '</span>, num2str(iAtlas), <span class="string">' has duplicates in '</span> <span class="keyword">...</span>
+                            <span class="string">'tissuelabel field!'</span>])
+    <span class="keyword">end</span>
+</pre><h2 id="7">prepare 2D matrix of label-numbers nAtlas x nLabels</h2><pre class="codeinput">    <span class="keyword">if</span>(iAtlas == 1)
+        refLabels = A.tissuelabel;
+        refLabNums = 1:numel(refLabels);
+        labelNumsMatrix = zeros(nAtlas, numel(refLabels));
+    <span class="keyword">end</span>
+
+    [labPresent, labOrder] = ismember(refLabels, A.tissuelabel);
+    <span class="comment">% check if all labels are present</span>
+    <span class="keyword">if</span>(~all(labPresent))
+        error([<span class="string">'Error! Atlas no '</span>, num2str(iAtlas), <span class="string">' has missing labels!'</span>])
+    <span class="keyword">end</span>
+
+    labelNumsMatrix(iAtlas,:) = labOrder;
+</pre><h2 id="8">prepare 2D matrix of unique sorted tissue</h2><pre class="codeinput">    <span class="keyword">if</span>(iAtlas == 1)
+        tissueCell = cell(1, nAtlas);
+    <span class="keyword">end</span>
+
+    tissueCell{iAtlas} = setdiff(sort(unique(A.tissue)), 0);
+</pre><h2 id="9">note down iSub field values for checking below</h2><pre class="codeinput">    iSubTable(iAtlas) = A.iSub;
+</pre><pre class="codeinput"><span class="keyword">end</span>
+
+<span class="comment">% check for iSub field value duplicates (cannot have two different atlases</span>
+<span class="comment">% linked to the same subject)</span>
+<span class="keyword">if</span>(numel(unique(iSubTable)) &lt; nAtlas)
+    error([<span class="string">'Error! There are at least two atlases with the same iSub field '</span> <span class="keyword">...</span>
+           <span class="string">'value!'</span>])
+<span class="keyword">end</span>
+
+<span class="comment">% check labels order</span>
+<span class="keyword">if</span>(~issorted(labelNumsMatrix, 2, <span class="string">'ascend'</span>)) <span class="comment">% all rows should be 1 2 3 ...</span>
+    error(<span class="string">'Error! Labels order not match across atlases!'</span>)
+<span class="keyword">end</span>
+
+<span class="comment">% find common set of ROI that have at least one voxel</span>
+roiSet = tissueCell{1};
+<span class="keyword">for</span> iAtlas = 2:nAtlas
+    roiSet = intersect(roiSet, tissueCell{iAtlas});
+<span class="keyword">end</span>
+roiValidForAllSubjects = roiSet;
+<span class="keyword">if</span>(~isrow(roiValidForAllSubjects))
+    roiValidForAllSubjects = roiValidForAllSubjects';
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [atlases, roiValidForAllSubjects]  = checkIndAtlasesConsistency(atlases)
+%%
+% Function that checks if a structure array containing individual brain
+% atlases has consistent fields.
+%% Inputs
+% *atlases* - array of struct. Each struct represents single subject atlas
+%             and has the following fields:
+%
+% _iSub_ - double; integer index of subject 
+%
+% _path_ - char; path to the source file from which atlas was prepared
+%
+% _dim_ - double 1-D array of positive integers; the size of the 3D volume in 
+%         voxels
+%
+% _transform_ - double 2-D array containing affine transformation matrix for 
+%               mapping the voxel coordinates to head coordinate system
+%
+% _unit_ - string; the units in which the coordinate system is expressed
+%
+% _tissue_ - double 3-D array with integer values from 1 to N (the value 0
+%            means unknown). Values are related to the ROI labels stored in
+%            _tissuelabel_ fields. Size of each dimension is stored in the 
+%            _dim_ field. It stores ROI label for each brain voxel.
+%
+% _tissuelabel_ - cell of strings containing name of each ROI. 
+%% Outputs
+% *atlases* - same as input.
+%
+% *roiValidForAllSubjects* - double 1-D array containing list of ROIs common
+%                            for all subjects, i.e. for each subject each of 
+%                            these ROI has at least one entry in the _tissue_ 
+%                            field inside **atlas** structure.
+%%
+      
+nAtlas = numel(atlases);
+iSubTable = zeros(1,nAtlas);
+for iAtlas = 1:nAtlas
+    A = atlases(iAtlas);
+    
+    % 1. Check for empty fields
+    for f = fieldnames(A)'
+       if( isempty(A.(f{1})) )
+           error(['Error! Atlas no ', num2str(iAtlas), ' has empty fields!'])
+       end
+    end
+
+    % 2. Check for duplicate labels
+    if(numel(unique(A.tissuelabel)) < numel(A.tissuelabel))
+        error(['Error! Atlas no ', num2str(iAtlas), ' has duplicates in ' ...
+                            'tissuelabel field!'])
+    end
+    
+    %% prepare 2D matrix of label-numbers nAtlas x nLabels
+    if(iAtlas == 1)
+        refLabels = A.tissuelabel;
+        refLabNums = 1:numel(refLabels);
+        labelNumsMatrix = zeros(nAtlas, numel(refLabels));
+    end
+    
+    [labPresent, labOrder] = ismember(refLabels, A.tissuelabel);
+    % check if all labels are present
+    if(~all(labPresent))
+        error(['Error! Atlas no ', num2str(iAtlas), ' has missing labels!'])
+    end
+        
+    labelNumsMatrix(iAtlas,:) = labOrder;
+    
+    %% prepare 2D matrix of unique sorted tissue
+    if(iAtlas == 1)
+        tissueCell = cell(1, nAtlas);
+    end
+    
+    tissueCell{iAtlas} = setdiff(sort(unique(A.tissue)), 0);
+    
+    %% note down iSub field values for checking below
+    iSubTable(iAtlas) = A.iSub;
+    %%
+end
+
+% check for iSub field value duplicates (cannot have two different atlases
+% linked to the same subject)
+if(numel(unique(iSubTable)) < nAtlas)
+    error(['Error! There are at least two atlases with the same iSub field ' ...
+           'value!'])
+end
+
+% check labels order
+if(~issorted(labelNumsMatrix, 2, 'ascend')) % all rows should be 1 2 3 ...
+    error('Error! Labels order not match across atlases!')
+end 
+
+% find common set of ROI that have at least one voxel
+roiSet = tissueCell{1};
+for iAtlas = 2:nAtlas
+    roiSet = intersect(roiSet, tissueCell{iAtlas});
+end
+roiValidForAllSubjects = roiSet;
+if(~isrow(roiValidForAllSubjects))
+    roiValidForAllSubjects = roiValidForAllSubjects';
+end
+##### SOURCE END #####
+--></body></html>

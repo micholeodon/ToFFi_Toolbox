@@ -1,0 +1,194 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>computeMeanRoiPower</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-02"><meta name="DC.source" content="computeMeanRoiPower.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Inputs</a></li><li><a href="#4">Outputs</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> roiPower = computeMeanRoiPower(cfg, iSub, iROI, sourcesPower)
+</pre><p>Computes average power spectrum across all voxels of the selected ROI.</p><h2 id="3">Inputs</h2><p><b>cfg</b> - struct containing field:</p><p><i>sourceAtlasAndSourceModel</i> - struct with fields:</p><pre>   _sourceModel_ - struct; output of prepareSourceModel.m routine</pre><pre>   _sourceAtlas_ - struct; output of prepareAtlas.m routine</pre><pre>   _areNonRoiVoxelPresent_ - double; 0 (all voxels from atlas has assigned
+                             ROI) or 1 (there are voxels that have no
+                             assigned ROI).</pre><p><i>mode</i> - (optional) char; when eqals 'rand' cfg.numRandVox number of voxels          (instead of all the ROI voxels) is randomly chosen from selected          ROI and average of their activity serves as ROI power.</p><p><i>numRandVox</i> - (optional) double; integer number of voxels to be randomly                chosen from selected ROI.</p><p><i>iGoodSub</i> - double positive integer; position of the <b>iSub</b> in the              CFG.Global.goodSubjects list</p><p><b>iSub</b> - double; integer index of subject for whom power will be computed</p><p><b>iROI</b> - double; integer index of ROI to be selected. Average power across          its voxels will be computed.</p><p><b>sourcesPower</b> - struct with field:</p><p><i>powerSpectrum</i> - double; 3D-array that contains values of power spectrum for                   each time segment (trial), voxel and frequency.                   Size: trials x voxels x frequencies.</p><h2 id="4">Outputs</h2><p><b>roiPower</b> - double; 2D-array that contains values of power spectrum for              each time segment (trial) and frequency.              Size: trials x frequencies.</p><pre class="codeinput">iGoodSub = cfg.iGoodSub;
+
+disp(<span class="string">'Computing mean ROI power ...'</span>)
+
+<span class="keyword">if</span>(~isfield(cfg, <span class="string">'sourceAtlasAndSourceModel'</span>)) error(<span class="string">'No sourceAtlasAndSourceModel field in cfg !'</span>); <span class="keyword">end</span>
+
+sourceAtlas = cfg.sourceAtlasAndSourceModel.sourceAtlas;
+nAtlas = numel(sourceAtlas);
+<span class="keyword">if</span>(nAtlas&gt;1)
+    sourceAtlasSingle = sourceAtlas(iGoodSub)
+<span class="keyword">else</span>
+    sourceAtlasSingle = sourceAtlas(1);
+<span class="keyword">end</span>
+sourceModel = cfg.sourceAtlasAndSourceModel.sourceModel;
+
+nTrials = size(sourcesPower.powerSpectrum, 1);
+nFrequencies = size(sourcesPower.powerSpectrum, 3);
+
+roiIndices          = getRoiInsideIndices(iROI, sourceAtlasSingle, sourceModel);
+<span class="keyword">if</span>(isempty(roiIndices))
+    error([<span class="string">'computeMeanRoiPower: ROI'</span>, num2str(iROI), <span class="string">' has empty list of voxels indices !'</span>])
+<span class="keyword">end</span>
+
+
+<span class="keyword">if</span>(isfield(cfg, <span class="string">'mode'</span>))
+    <span class="keyword">switch</span> cfg.mode
+      <span class="keyword">case</span> <span class="string">'rand'</span> <span class="comment">% select few voxels (no repeats) and compute mean</span>
+	nVox = cfg.numRandVox;
+	idx = randperm(numel(roiIndices), nVox);
+	roiIndicesSelected = roiIndices(idx);
+	roiPower  = reshape(mean(sourcesPower.powerSpectrum(:,roiIndicesSelected,:), 2), nTrials, nFrequencies);
+      <span class="keyword">otherwise</span>
+	<span class="comment">% pretend there is no cfg.mode field</span>
+	roiPower  = reshape(mean(sourcesPower.powerSpectrum(:,roiIndices,:), 2), nTrials, nFrequencies);
+    <span class="keyword">end</span>
+<span class="keyword">else</span>
+    roiPower  = reshape(mean(sourcesPower.powerSpectrum(:,roiIndices,:), 2), nTrials, nFrequencies);
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function roiPower = computeMeanRoiPower(cfg, iSub, iROI, sourcesPower)
+%%
+% Computes average power spectrum across all voxels of the selected ROI.
+%% Inputs
+% *cfg* - struct containing field:
+%
+% _sourceAtlasAndSourceModel_ - struct with fields:
+%
+%     _sourceModel_ - struct; output of prepareSourceModel.m routine
+%
+%     _sourceAtlas_ - struct; output of prepareAtlas.m routine
+%
+%     _areNonRoiVoxelPresent_ - double; 0 (all voxels from atlas has assigned
+%                               ROI) or 1 (there are voxels that have no
+%                               assigned ROI).
+%
+% _mode_ - (optional) char; when eqals 'rand' cfg.numRandVox number of voxels
+%          (instead of all the ROI voxels) is randomly chosen from selected
+%          ROI and average of their activity serves as ROI power.
+%
+% _numRandVox_ - (optional) double; integer number of voxels to be randomly
+%                chosen from selected ROI.
+%
+% _iGoodSub_ - double positive integer; position of the *iSub* in the
+%              CFG.Global.goodSubjects list
+%
+% *iSub* - double; integer index of subject for whom power will be computed
+%
+% *iROI* - double; integer index of ROI to be selected. Average power across
+%          its voxels will be computed.
+%
+% *sourcesPower* - struct with field:
+%
+% _powerSpectrum_ - double; 3D-array that contains values of power spectrum for
+%                   each time segment (trial), voxel and frequency.
+%                   Size: trials x voxels x frequencies.
+%% Outputs
+% *roiPower* - double; 2D-array that contains values of power spectrum for
+%              each time segment (trial) and frequency.
+%              Size: trials x frequencies.
+%%
+iGoodSub = cfg.iGoodSub;
+
+disp('Computing mean ROI power ...')
+
+if(~isfield(cfg, 'sourceAtlasAndSourceModel')) error('No sourceAtlasAndSourceModel field in cfg !'); end
+
+sourceAtlas = cfg.sourceAtlasAndSourceModel.sourceAtlas;
+nAtlas = numel(sourceAtlas);
+if(nAtlas>1)
+    sourceAtlasSingle = sourceAtlas(iGoodSub)
+else
+    sourceAtlasSingle = sourceAtlas(1);
+end
+sourceModel = cfg.sourceAtlasAndSourceModel.sourceModel;
+
+nTrials = size(sourcesPower.powerSpectrum, 1);
+nFrequencies = size(sourcesPower.powerSpectrum, 3);
+
+roiIndices          = getRoiInsideIndices(iROI, sourceAtlasSingle, sourceModel);
+if(isempty(roiIndices))
+    error(['computeMeanRoiPower: ROI', num2str(iROI), ' has empty list of voxels indices !'])
+end
+
+
+if(isfield(cfg, 'mode'))
+    switch cfg.mode
+      case 'rand' % select few voxels (no repeats) and compute mean
+	nVox = cfg.numRandVox;
+	idx = randperm(numel(roiIndices), nVox);
+	roiIndicesSelected = roiIndices(idx);
+	roiPower  = reshape(mean(sourcesPower.powerSpectrum(:,roiIndicesSelected,:), 2), nTrials, nFrequencies);
+      otherwise
+	% pretend there is no cfg.mode field
+	roiPower  = reshape(mean(sourcesPower.powerSpectrum(:,roiIndices,:), 2), nTrials, nFrequencies);
+    end
+else
+    roiPower  = reshape(mean(sourcesPower.powerSpectrum(:,roiIndices,:), 2), nTrials, nFrequencies);
+end
+
+##### SOURCE END #####
+--></body></html>
