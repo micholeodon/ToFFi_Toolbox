@@ -1,6 +1,6 @@
 # `ToFFi Toolbox`
 
-This repository contains "before peer review" version of the software related to the preprint of the publication [ToFFi - Toolbox for Frequency-based Fingerprinting of Brain Signals (arXiv:2110.09919)](https://arxiv.org/abs/2110.09919) by Michał Konrad Komorowski ([@micholeodon](https://github.com/micholeodon)) from Neurocognitive Laboratory at Nicolaus Copernicus University, Torun, Poland, and his collaborators.
+This repository contains the software related to the publication [ToFFi - Toolbox for frequency-based fingerprinting of brain signals](https://doi.org/10.1016/j.neucom.2023.126236), published 24th April 2023 in Neurocomputing journal, by Michał Konrad Komorowski ([@micholeodon](https://github.com/micholeodon)) from Neurocognitive Laboratory at Nicolaus Copernicus University, Torun, Poland, and his collaborators.
 
 ## Abstract
 
